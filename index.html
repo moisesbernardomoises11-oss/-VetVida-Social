@@ -61,6 +61,9 @@
 </head>
 <body class="bg-gray-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 font-sans transition-colors duration-300">
 
+<!-- INPUT OCULTO GLOBAL PARA CARREGAR FOTO DE PERFIL -->
+<input type="file" id="globalProfileUpload" accept="image/*" class="hidden" onchange="handleProfilePhotoUpload(this)">
+
 <div class="min-h-screen flex flex-col pb-24 md:pb-0">
     <!-- HEADER -->
     <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-gray-200 dark:border-slate-800 transition-colors">
@@ -155,9 +158,14 @@
             <!-- SIDEBAR: PAINEL LATERAL ESQUERDO (Responsivo Desktop / Menu Gaveta no Mobile) -->
             <aside id="sidebarPanel" class="hidden lg:block fixed lg:static top-0 left-0 bottom-0 z-40 w-72 lg:w-auto bg-white dark:bg-slate-900 lg:bg-transparent dark:lg:bg-transparent p-6 lg:p-0 border-r lg:border-r-0 border-gray-200 dark:border-slate-800 lg:col-span-4 space-y-6 transition-transform duration-300 -translate-x-full lg:translate-x-0 overflow-y-auto lg:overflow-visible">
                 
-                <!-- TOPO DO PAINEL: Perfil Só de Foto e Seta de Voltar (Apenas visível em modo Mobile/Gaveta) -->
+                <!-- TOPO DO PAINEL: Foto Editável e Seta de Voltar (Apenas Mobile/Gaveta) -->
                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-4 mb-2 lg:hidden">
-                    <img id="panelHeaderAvatar" class="w-12 h-12 rounded-full object-cover border-2 border-brand-500" src="https://ui-avatars.com/api/?background=cbd5e1&color=64748b&name=Novo+Usuario" alt="Avatar Painel">
+                    <div class="relative w-12 h-12 group cursor-pointer" onclick="triggerProfilePhotoUpload()">
+                        <img id="panelHeaderAvatar" class="w-12 h-12 rounded-full object-cover border-2 border-brand-500" src="https://ui-avatars.com/api/?background=cbd5e1&color=64748b&name=Novo+Usuario" alt="Avatar Painel">
+                        <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center text-white text-[10px] opacity-100 transition-opacity">
+                            <i class="fas fa-pen text-[9px]"></i>
+                        </div>
+                    </div>
                     <button onclick="closeMobileMenu()" class="w-10 h-10 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Voltar">
                         <i class="fas fa-arrow-left text-base"></i>
                     </button>
@@ -202,11 +210,11 @@
                     </nav>
                 </div>
 
-                <!-- Mini Profile Display (Oculto no Mobile pois já está na barra inferior) -->
+                <!-- Mini Profile Display (Desktop) -->
                 <div class="hidden lg:block bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-100 dark:border-slate-800 shadow-sm text-center">
                     <div class="relative w-20 h-20 mx-auto mb-3">
                         <img id="sidebarAvatar" class="w-20 h-20 rounded-full object-cover border-2 border-brand-500" src="https://ui-avatars.com/api/?background=cbd5e1&color=64748b&name=Novo+Usuario" alt="Avatar">
-                        <button onclick="openProfileModal()" class="absolute bottom-0 right-0 bg-brand-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] hover:scale-105 transition shadow-md">
+                        <button onclick="triggerProfilePhotoUpload()" class="absolute bottom-0 right-0 bg-brand-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] hover:scale-105 transition shadow-md">
                             <i class="fas fa-pencil"></i>
                         </button>
                     </div>
@@ -301,7 +309,7 @@
                         <h2 class="text-xl font-extrabold text-brand-500 dark:text-brand-accent flex items-center gap-2">
                             <i class="fas fa-book-open"></i> Manual de Sanidade & Criação Animal
                         </h2>
-                        <p class="text-xs text-slate-400 mt-1">Guia completo para produção rural e familiar focado em nutrição orgânica, higiene, biossegurança e profilaxia.</p>
+                        <p class="text-xs text-slate-400 mt-1">Guia completo para production rural e familiar focado em nutrição orgânica, higiene, biossegurança e profilaxia.</p>
                         
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
                             <button onclick="filterGuide('aves')" id="btn-guide-aves" class="guide-btn-filter p-3 rounded-xl border-2 border-brand-500 bg-brand-50 dark:bg-brand-500/10 text-brand-500 dark:text-brand-accent flex flex-col items-center gap-2 transition text-center">
@@ -428,6 +436,16 @@
             <button onclick="closeModal('profileModal')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
         </div>
         <div class="space-y-3 text-xs">
+            <!-- Foto de Perfil Dentro do Modal -->
+            <div class="flex flex-col items-center gap-2 mb-2">
+                <div class="relative w-16 h-16 cursor-pointer" onclick="triggerProfilePhotoUpload()">
+                    <img id="modalAvatar" class="w-16 h-16 rounded-full object-cover border-2 border-brand-500" src="https://ui-avatars.com/api/?background=cbd5e1&color=64748b&name=Novo+Usuario" alt="Avatar Modal">
+                    <div class="absolute bottom-0 right-0 bg-brand-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[9px]">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                </div>
+                <span class="text-[10px] text-gray-400">Clique na foto para alterar</span>
+            </div>
             <div>
                 <label class="block font-bold mb-1">Nome Completo:</label>
                 <input type="text" id="inputName" class="w-full p-2.5 rounded-xl border bg-slate-50 dark:bg-slate-950 dark:border-slate-800" placeholder="Insira o seu nome">
@@ -484,7 +502,32 @@
     let mapInitialized = false;
     let currentMap = null;
     let selectedPostPhotoData = "";
+    let customProfilePhotoBase64 = ""; // Guarda a foto carregada pelo utilizador
     let isMobileMenuOpen = false;
+
+    // Disparar o seletor de ficheiros de imagem para o Perfil
+    function triggerProfilePhotoUpload() {
+        document.getElementById('globalProfileUpload').click();
+    }
+
+    // Processar a foto de perfil carregada localmente
+    function handleProfilePhotoUpload(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                customProfilePhotoBase64 = e.target.result;
+                
+                // Atualizar imediatamente em todos os elementos de imagem de perfil do app
+                document.getElementById('headerAvatar').src = customProfilePhotoBase64;
+                document.getElementById('sidebarAvatar').src = customProfilePhotoBase64;
+                document.getElementById('postAvatar').src = customProfilePhotoBase64;
+                document.getElementById('mobileFooterAvatar').src = customProfilePhotoBase64;
+                document.getElementById('panelHeaderAvatar').src = customProfilePhotoBase64;
+                document.getElementById('modalAvatar').src = customProfilePhotoBase64;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
 
     // Abrir/Fechar Menu Hambúrguer (Mobile)
     function toggleMobileMenu() {
@@ -577,23 +620,27 @@
         openModal('profileModal');
     }
 
-    // Salvar Perfil
+    // Salvar Dados do Perfil (Texto)
     function saveProfile() {
         const name = document.getElementById('inputName').value || "Usuário VetVida";
         const role = document.getElementById('inputRole').value;
         const bio = document.getElementById('inputBio').value || "Sem biografia cadastrada.";
-        const avatarUrl = `https://ui-avatars.com/api/?background=1b5e4a&color=fff&name=${encodeURIComponent(name)}`;
+        
+        // Caso o utilizador não tenha carregado foto personalizada, gera uma com as iniciais do nome
+        if(!customProfilePhotoBase64) {
+            const avatarUrl = `https://ui-avatars.com/api/?background=1b5e4a&color=fff&name=${encodeURIComponent(name)}`;
+            document.getElementById('headerAvatar').src = avatarUrl;
+            document.getElementById('sidebarAvatar').src = avatarUrl;
+            document.getElementById('postAvatar').src = avatarUrl;
+            document.getElementById('mobileFooterAvatar').src = avatarUrl;
+            document.getElementById('panelHeaderAvatar').src = avatarUrl;
+            document.getElementById('modalAvatar').src = avatarUrl;
+        }
 
         document.getElementById('headerName').innerText = name;
         document.getElementById('sidebarName').innerText = name;
         document.getElementById('sidebarRole').innerText = role;
         document.getElementById('sidebarBio').innerText = `"${bio}"`;
-        
-        document.getElementById('headerAvatar').src = avatarUrl;
-        document.getElementById('sidebarAvatar').src = avatarUrl;
-        document.getElementById('postAvatar').src = avatarUrl;
-        document.getElementById('mobileFooterAvatar').src = avatarUrl;
-        document.getElementById('panelHeaderAvatar').src = avatarUrl;
 
         document.getElementById('virginProfileBanner').classList.add('hidden');
         closeModal('profileModal');
@@ -634,7 +681,7 @@
         counter.innerText = parseInt(counter.innerText) + 1;
     }
 
-    // Manipulação de fotos do feed
+    // Manipulação de fotos anexadas no feed
     function triggerLocalPhotoUpload() {
         document.getElementById('postPhotoUpload').click();
     }
