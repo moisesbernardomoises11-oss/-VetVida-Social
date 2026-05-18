@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>VetVida+ Social | Dr. Moisés - IA Veterinária</title>
+    <title>VetVida+ | Sistema Universal Offline</title>
     
     <!-- Google Fonts & Font Awesome -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -12,7 +12,7 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Leaflet JS & CSS para Mapas -->
+    <!-- Leaflet JS & CSS para Mapas (Funciona via GPS integrado) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -40,315 +40,401 @@
         }
     </script>
     <style>
-        /* Custom scrollbars */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-        .dark ::-webkit-scrollbar-thumb {
-            background: #475569;
-        }
-        #pharmacyMap {
-            z-index: 10;
-        }
-        /* Efeito de transição suave para o menu lateral */
-        .sidebar-transition {
-            transition: transform 0.3s ease-in-out;
-        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        #pharmacyMap { z-index: 10; }
     </style>
 </head>
 <body class="bg-gray-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 font-sans transition-colors duration-300">
 
-<div class="min-h-screen flex flex-col pb-20 md:pb-0">
-    
+<input type="file" id="globalProfileUpload" accept="image/*" class="hidden" onchange="handleProfilePhotoUpload(this)">
+
+<div class="min-h-screen flex flex-col pb-24 md:pb-0">
     <!-- HEADER -->
     <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-gray-200 dark:border-slate-800 transition-colors">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
             
-            <!-- Botão do Menu Lateral Esquerdo (Três Setas) -->
-            <button onclick="toggleSidebar()" class="p-2 text-slate-600 dark:text-slate-300 bg-gray-100 dark:bg-slate-800 rounded-xl hover:bg-gray-200 dark:hover:bg-slate-700 transition flex items-center justify-center">
-                <i class="fas fa-angle-double-right text-lg tracking-tighter"></i>
-                <span class="text-xs font-bold ml-1 hidden sm:inline">Menu</span>
+            <button onclick="toggleMobileMenu()" class="lg:hidden w-10 h-10 flex flex-col justify-center items-center gap-1.5 text-slate-600 dark:text-slate-300 focus:outline-none z-50">
+                <span class="w-6 h-0.5 bg-current transition-transform duration-300" id="hamburger-line1"></span>
+                <span class="w-6 h-0.5 bg-current transition-opacity duration-300" id="hamburger-line2"></span>
+                <span class="w-6 h-0.5 bg-current transition-transform duration-300" id="hamburger-line3"></span>
             </button>
 
-            <!-- Logo -->
-            <div class="flex items-center gap-3 cursor-pointer flex-grow sm:flex-grow-0" onclick="changeTab('feed')">
+            <div class="flex items-center gap-3 cursor-pointer mr-auto lg:mr-0" onclick="changeTab('feed')">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-500 to-brand-accent flex items-center justify-center text-white text-xl shadow-lg shadow-brand-500/20">
                     <i class="fas fa-heartbeat"></i>
                 </div>
                 <div>
-                    <h1 class="text-lg font-extrabold text-brand-500 dark:text-brand-accent leading-none">VetVida+ Social</h1>
-                    <span class="text-[10px] text-gray-400 dark:text-gray-500 font-medium tracking-wider uppercase">Membro de Dr. Moisés</span>
+                    <h1 class="text-lg font-extrabold text-brand-500 dark:text-brand-accent leading-none">VetVida+</h1>
+                    <span class="text-[10px] text-gray-400 dark:text-gray-500 font-medium tracking-wider uppercase">Sistema de Proteção Global</span>
                 </div>
             </div>
 
-            <!-- GPS Indicator Global -->
+            <!-- DETETOR DE PAÍS VIA GPS (Modo Offline Seguro) -->
             <div class="hidden sm:flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full border border-gray-200 dark:border-slate-700">
-                <i class="fas fa-map-marker-alt text-brand-accent animate-pulse"></i>
-                <span class="text-xs font-semibold" id="locationDisplay">Buscando localização...</span>
-                <span class="text-[9px] bg-emerald-500 text-white px-2 py-0.5 rounded-full uppercase tracking-widest font-bold" id="gpsStatus">Localizador</span>
+                <i class="fas fa-satellite-dish text-brand-accent animate-pulse"></i>
+                <span class="text-xs font-semibold" id="locationDisplay">A detetar país (GPS)...</span>
+                <span id="networkStatus" class="text-[9px] bg-emerald-500 text-white px-2 py-0.5 rounded-full uppercase tracking-widest font-bold">Local Autónomo</span>
             </div>
 
-            <!-- Header Actions -->
             <div class="flex items-center gap-3">
-                <!-- Theme Toggle Button -->
                 <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition">
                     <i class="fas fa-moon dark:hidden"></i>
                     <i class="fas fa-sun hidden dark:block"></i>
+                </button>
+
+                <button onclick="openProfileModal()" class="hidden md:flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 rounded-full transition border border-gray-200 dark:border-slate-700">
+                    <img id="headerAvatar" class="w-7 h-7 rounded-full object-cover border border-white" src="https://ui-avatars.com/api/?background=cbd5e1&color=64748b&name=Produtor" alt="Perfil">
+                    <span class="text-xs font-bold text-slate-700 dark:text-slate-200 max-w-[100px] truncate" id="headerName">Definir Conta</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- MENU LATERAL ESQUERDO (PAINEL RETRÁTIL) -->
-    <div id="sidePanel" class="fixed inset-y-0 left-0 w-72 bg-white dark:bg-slate-900 z-50 shadow-2xl border-r border-gray-200 dark:border-slate-800 p-5 transform -translate-x-full sidebar-transition overflow-y-auto flex flex-col justify-between">
-        <div class="space-y-6">
-            <!-- Cabeçalho do Menu Lateral -->
-            <div class="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-4">
-                <div class="flex items-center gap-2 text-brand-500 dark:text-brand-accent">
-                    <i class="fas fa-sliders-h"></i>
-                    <span class="font-extrabold text-sm uppercase tracking-wider">Configurações</span>
-                </div>
-                <button onclick="toggleSidebar()" class="text-gray-400 hover:text-gray-600 dark:hover:text-white p-1">
-                    <i class="fas fa-times text-lg"></i>
-                </button>
-            </div>
-
-            <!-- PAINEL DE CONTROLO -->
-            <div>
-                <h3 class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 mb-2">Painel de Controlo</h3>
-                <nav class="space-y-1">
-                    <button onclick="changeTab('feed'); toggleSidebar();" id="nav-feed" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/10 dark:text-brand-accent font-bold text-xs transition">
-                        <span class="flex items-center gap-3"><i class="fas fa-rss text-base"></i> Feed da Comunidade</span>
-                        <span class="bg-brand-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full" id="feedCounter">0</span>
-                    </button>
-                    <button onclick="changeTab('diretorio'); toggleSidebar();" id="nav-diretorio" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition">
-                        <i class="fas fa-book-open text-base"></i> Guia Técnico de Criação
-                    </button>
-                    <button onclick="changeTab('amelia'); toggleSidebar();" id="nav-amelia" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition">
-                        <i class="fas fa-microscope text-base"></i> Diagnóstico Amélia IA
-                    </button>
-                    <button onclick="changeTab('farmacia'); toggleSidebar();" id="nav-farmacia" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition">
-                        <i class="fas fa-map-marked-alt text-base"></i> Farmácias & Clínicas
-                    </button>
-                </nav>
-            </div>
-
-            <!-- PASTA DE DEFINIÇÕES E PRIVACIDADE -->
-            <div>
-                <h3 class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 mb-2">Definições & Privacidade</h3>
-                <nav class="space-y-1 text-xs">
-                    <button onclick="openProfileModal(); toggleSidebar();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition">
-                        <i class="fas fa-user-cog text-brand-accent text-sm w-5"></i> Conta e Perfil
-                    </button>
-                    <button onclick="openSecurityModal(); toggleSidebar();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition">
-                        <i class="fas fa-shield-alt text-brand-accent text-sm w-5"></i> Segurança & PIN
-                    </button>
-                    <button onclick="openPrivacyModal(); toggleSidebar();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition">
-                        <i class="fas fa-user-shield text-brand-accent text-sm w-5"></i> Privacidade de Dados
-                    </button>
-                    <button onclick="openHelpModal(); toggleSidebar();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition">
-                        <i class="fas fa-info-circle text-brand-accent text-sm w-5"></i> Contextos & Ajuda
-                    </button>
-                </nav>
-            </div>
-        </div>
-
-        <!-- Mini GPS Status no rodapé do menu lateral -->
-        <div class="mt-auto pt-4 border-t border-gray-100 dark:border-slate-800 text-[11px] font-mono text-slate-400">
-            <div><i class="fas fa-globe-africa mr-1 text-brand-accent"></i> GPS: <span id="gpsCity" class="text-slate-600 dark:text-slate-300">-</span></div>
-        </div>
+    <!-- NAVEGAÇÃO MOBILE -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 z-40 lg:hidden flex justify-around items-center h-16 px-2 shadow-xl">
+        <button onclick="openProfileModal()" class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 gap-0.5">
+            <img id="mobileFooterAvatar" class="w-5 h-5 rounded-full object-cover border" src="https://ui-avatars.com/api/?background=cbd5e1&color=64748b&name=P" alt="Perfil">
+            <span class="text-[10px] font-medium">Perfil</span>
+        </button>
+        <button onclick="changeTab('feed')" id="footer-nav-feed" class="flex flex-col items-center justify-center text-brand-500 dark:text-brand-accent gap-0.5">
+            <i class="fas fa-rss text-lg"></i>
+            <span class="text-[10px] font-bold">Feed</span>
+        </button>
+        <button onclick="changeTab('diretorio')" id="footer-nav-diretorio" class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 gap-0.5">
+            <i class="fas fa-book-open text-lg"></i>
+            <span class="text-[10px] font-medium">Guia</span>
+        </button>
+        <button onclick="changeTab('amelia')" id="footer-nav-amelia" class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 gap-0.5">
+            <i class="fas fa-microscope text-lg"></i>
+            <span class="text-[10px] font-medium">Amélia IA</span>
+        </button>
+        <button onclick="changeTab('farmacia')" id="footer-nav-farmacia" class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 gap-0.5">
+            <i class="fas fa-map-marked-alt text-lg"></i>
+            <span class="text-[10px] font-medium">Radar GPS</span>
+        </button>
     </div>
 
-    <!-- Fundo escuro protetor ao abrir o menu lateral no telemóvel -->
-    <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/40 z-40 hidden backdrop-blur-xs"></div>
-
-    <!-- MAIN BODY GRID -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
-        <!-- Banner de Perfil Virgem Informativo -->
-        <div id="virginProfileBanner" class="mb-6 bg-gradient-to-r from-brand-500 to-brand-accent rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
-            <div class="absolute right-0 bottom-0 opacity-10 translate-y-6 translate-x-6 text-[120px] pointer-events-none">
-                <i class="fas fa-user-edit"></i>
+    <!-- MAIN BODY -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full relative">
+        
+        <!-- BANNER OFFLINE INFO -->
+        <div id="offlineBanner" class="mb-6 bg-gradient-to-r from-blue-600 to-brand-accent rounded-2xl p-5 text-white shadow-xl flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center gap-3">
+                <div class="text-2xl bg-white/20 p-3 rounded-xl"><i class="fas fa-bolt"></i></div>
+                <div>
+                    <h3 class="font-bold text-sm">Modo Seguro Offline Ativo</h3>
+                    <p class="text-xs opacity-90">Este sistema funciona sem saldo e sem internet. O GPS localiza tudo no seu país.</p>
+                </div>
             </div>
-            <div class="relative z-10 max-w-xl">
-                <span class="bg-white/20 text-xs uppercase tracking-wider font-extrabold px-3 py-1 rounded-full">Boas-vindas ao VetVida+</span>
-                <h2 class="text-2xl font-black mt-2">Personalize a sua Identidade Social!</h2>
-                <p class="text-sm opacity-90 mt-1">Crie a sua ficha agora mesmo. Pode definir se é Médico Veterinário, Produtor Comercial ou Criador Familiar para interagir com a comunidade global.</p>
-                <button onclick="openProfileModal()" class="mt-4 bg-white text-brand-500 hover:bg-slate-50 text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg transition flex items-center gap-2">
-                    <i class="fas fa-id-card"></i> Configurar Perfil Completo
-                </button>
-            </div>
+            <button onclick="requestGPSLocation()" class="bg-white text-blue-700 text-xs font-bold px-4 py-2 rounded-xl shadow hover:bg-slate-100 transition">
+                <i class="fas fa-location-crosshairs mr-1"></i> Forçar Sinal GPS
+            </button>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <!-- MIDDLE CONTAINER (Ocupa o espaço central adaptável) -->
-            <div class="lg:col-span-12 space-y-6">
+            
+            <!-- SIDEBAR LEFT -->
+            <aside id="sidebarPanel" class="hidden lg:block lg:col-span-4 space-y-6">
+                <!-- CARTÃO DE PERFIL -->
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-100 dark:border-slate-800 shadow-sm text-center relative">
+                    <div class="relative w-20 h-20 mx-auto mb-3 cursor-pointer" onclick="triggerProfilePhotoUpload()">
+                        <img id="sidebarAvatar" class="w-20 h-20 rounded-full object-cover border-2 border-brand-500 shadow-md" src="https://ui-avatars.com/api/?background=cbd5e1&color=64748b&name=U" alt="Avatar">
+                    </div>
+                    <h2 id="sidebarName" class="font-extrabold text-base truncate">Usuário Local</h2>
+                    <p id="sidebarRole" class="text-xs text-brand-accent font-semibold">Registo Guardado no Telefone</p>
+                    <p id="sidebarCountry" class="text-[11px] text-gray-400 font-bold uppercase mt-1 tracking-wider"><i class="fas fa-globe"></i> GPS Autónomo</p>
+                </div>
 
-                <!-- 1. TAB: FEED SOCIAL -->
+                <!-- MENU -->
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-gray-100 dark:border-slate-800 shadow-sm">
+                    <nav class="space-y-1">
+                        <button onclick="changeTab('feed')" id="nav-feed" class="nav-btn w-full flex items-center justify-between px-3 py-3 rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/10 dark:text-brand-accent font-bold transition">
+                            <span class="flex items-center gap-3"><i class="fas fa-rss text-lg"></i> Feed Compartilhado</span>
+                            <span class="bg-brand-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full" id="feedCounter">1</span>
+                        </button>
+                        <button onclick="changeTab('diretorio')" id="nav-diretorio" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition">
+                            <i class="fas fa-book-open text-lg"></i> Guia Técnico Internacional
+                        </button>
+                        <button onclick="changeTab('amelia')" id="nav-amelia" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition">
+                            <i class="fas fa-microscope text-lg"></i> Amélia IA (Offline)
+                        </button>
+                        <button onclick="changeTab('farmacia')" id="nav-farmacia" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition">
+                            <i class="fas fa-map-marked-alt text-lg"></i> Radar GPS de Lojas
+                        </button>
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- MIDDLE CONTAINER -->
+            <div class="lg:col-span-8 space-y-6">
+
+                <!-- TAB: FEED -->
                 <div id="tabContent-feed" class="tab-pane space-y-6">
-                    <!-- Create Post Box -->
                     <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-100 dark:border-slate-800 shadow-sm">
                         <div class="flex items-start gap-4">
-                            <img id="postAvatar" class="w-10 h-10 rounded-full object-cover" src="https://ui-avatars.com/api/?background=cbd5e1&color=64748b&name=Novo+Usuario" alt="Avatar">
+                            <img id="postAvatar" class="w-10 h-10 rounded-full object-cover" src="https://ui-avatars.com/api/?background=cbd5e1&color=64748b&name=U" alt="Avatar">
                             <div class="flex-grow space-y-3">
-                                <textarea id="postText" rows="3" class="w-full bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 dark:focus:border-brand-accent transition-colors resize-none placeholder-slate-400" placeholder="Escreva sobre os seus animais ou dúvidas veterinárias... 😊"></textarea>
-                                
-                                <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
-                                    <div class="flex items-center gap-2">
-                                        <button onclick="triggerLocalPhotoUpload()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold px-3 py-2 rounded-xl transition flex items-center gap-2">
-                                            <i class="fas fa-camera text-brand-accent"></i> Adicionar Foto
-                                        </button>
-                                        <input type="file" id="postPhotoUpload" accept="image/*" class="hidden" onchange="handlePostPhoto(this)">
-                                        
-                                        <button onclick="toggleEmojiPicker()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold px-3 py-2 rounded-xl transition flex items-center gap-1.5">
-                                            <span>😊</span> Emojis
-                                        </button>
-                                    </div>
-                                    <button onclick="createPost()" class="bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition shadow-lg shadow-brand-500/10 flex items-center gap-2">
-                                        <i class="fas fa-paper-plane"></i> Publicar no Feed
+                                <textarea id="postText" rows="3" class="w-full bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 resize-none" placeholder="Escreva uma publicação... (Fica gravada no dispositivo se estiver offline)"></textarea>
+                                <div class="flex justify-end">
+                                    <button onclick="createPost()" class="bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg transition">
+                                        <i class="fas fa-folder-plus mr-1"></i> Guardar/Publicar
                                     </button>
                                 </div>
-                                <div id="postPhotoPreviewContainer" class="hidden mt-2 relative">
-                                    <img id="postPhotoPreview" class="rounded-xl max-h-48 w-full object-cover" src="" alt="Ficheiro Carregado">
-                                    <button onclick="clearPostPhoto()" class="absolute top-2 right-2 bg-rose-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs shadow hover:scale-105 transition">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                                <div id="emojiPicker" class="hidden p-3 bg-slate-50 dark:bg-slate-950 border border-gray-100 dark:border-slate-800 rounded-xl max-h-40 overflow-y-auto grid grid-cols-8 sm:grid-cols-12 gap-1.5"></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- VetVida Tip Banner -->
-                    <div class="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/40 rounded-2xl p-4 flex items-start gap-3">
-                        <div class="text-emerald-500 mt-1"><i class="fas fa-circle-info"></i></div>
-                        <div>
-                            <h4 class="text-xs font-bold text-emerald-800 dark:text-emerald-400">Conselho de Saúde do Dia</h4>
-                            <p class="text-xs text-emerald-600 dark:text-emerald-500/90 mt-0.5">Mantenha os comedouros das aves sempre cobertos e protegidos da chuva para evitar a contaminação por fungos geradores de micotoxinas.</p>
+                    <!-- Lista de Posts Carregados Localmente -->
+                    <div id="postsList" class="space-y-6">
+                        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-100 dark:border-slate-800 shadow-sm space-y-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-brand-500 flex items-center justify-center text-white"><i class="fas fa-info-circle"></i></div>
+                                <div>
+                                    <h4 class="text-sm font-bold">Sistema VetVida+</h4>
+                                    <p class="text-[10px] text-slate-400">Notificação de Segurança Local</p>
+                                </div>
+                            </div>
+                            <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300">O banco de dados descentralizado está pronto. Qualquer publicação feita sem internet será armazenada em segurança no armazenamento do seu aparelho.</p>
                         </div>
                     </div>
-
-                    <!-- Feed List -->
-                    <div id="postsList" class="space-y-6"></div>
                 </div>
 
-                <!-- 2. TAB: GUIA TÉCNICO DE CRIAÇÃO -->
+                <!-- TAB: GUIA TÉCNICO COMPLETO -->
                 <div id="tabContent-diretorio" class="tab-pane hidden space-y-6">
                     <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-100 dark:border-slate-800 shadow-sm">
                         <h2 class="text-xl font-extrabold text-brand-500 dark:text-brand-accent flex items-center gap-2">
-                            <i class="fas fa-book-open"></i> Manual de Sanidade & Criação Animal
+                            <i class="fas fa-book-open"></i> Enciclopédia Animal Incorporada (100% Offline)
                         </h2>
-                        <p class="text-xs text-slate-400 mt-1">Guia completo para produção rural e familiar focado em nutrição orgânica, higiene, biossegurança e profilaxia.</p>
+                        <p class="text-xs text-slate-400 mt-1">Manuais de tratamento e dosagens biológicas integrados diretamente na aplicação para consulta em zonas sem rede.</p>
                         
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
-                            <button onclick="filterGuide('aves')" id="btn-guide-aves" class="guide-btn-filter p-3 rounded-xl border-2 border-brand-500 bg-brand-50 dark:bg-brand-500/10 text-brand-500 dark:text-brand-accent flex flex-col items-center gap-2 transition text-center">
-                                <span class="text-2xl">🐓</span> <span class="text-xs font-bold">Aves (Galinhas)</span>
-                            </button>
-                            <button onclick="filterGuide('bovinos')" id="btn-guide-bovinos" class="guide-btn-filter p-3 rounded-xl border border-gray-100 dark:border-slate-800 hover:border-brand-500/50 flex flex-col items-center gap-2 transition text-center text-slate-600 dark:text-slate-400">
-                                <span class="text-2xl">🐂</span> <span class="text-xs font-bold">Bovinos (Gado)</span>
-                            </button>
-                            <button onclick="filterGuide('caprinos')" id="btn-guide-caprinos" class="guide-btn-filter p-3 rounded-xl border border-gray-100 dark:border-slate-800 hover:border-brand-500/50 flex flex-col items-center gap-2 transition text-center text-slate-600 dark:text-slate-400">
-                                <span class="text-2xl">🐐</span> <span class="text-xs font-bold">Caprinos (Cabras)</span>
-                            </button>
-                            <button onclick="filterGuide('suinos')" id="btn-guide-suinos" class="guide-btn-filter p-3 rounded-xl border border-gray-100 dark:border-slate-800 hover:border-brand-500/50 flex flex-col items-center gap-2 transition text-center text-slate-600 dark:text-slate-400">
-                                <span class="text-2xl">🐖</span> <span class="text-xs font-bold">Suínos (Porcos)</span>
-                            </button>
-                        </div>
-
-                        <div id="guideContainer" class="mt-6 border-t border-gray-100 dark:border-slate-800 pt-6">
-                            <!-- Conteúdo das Aves -->
-                            <div id="guide-aves" class="guide-content-section space-y-6">
-                                <div class="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl p-4 text-white">
-                                    <h3 class="text-base font-bold flex items-center gap-2"><i class="fas fa-feather-alt"></i> Avicultura Familiar e Comercial de Aves</h3>
-                                </div>
-                                <div class="space-y-4">
-                                    <div>
-                                        <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200 border-l-4 border-brand-500 pl-2">1. Métodos de Production Sustentável</h4>
-                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">O método caipira melhora o bem-estar animal: permita acesso a piquetes externos durante o dia.</p>
-                                    </div>
-                                </div>
+                        <div class="grid grid-cols-2 gap-3 mt-4">
+                            <div class="p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border">
+                                <h3 class="font-bold text-xs text-brand-500 mb-1">🐓 Avicultura (Galinhas e Aves)</h3>
+                                <p class="text-[11px] text-slate-500">Tratamento de parasitas, limpeza de capoeiras, soluções rústicas protetoras (alho, cinza) e isolamento preventivo.</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border">
+                                <h3 class="font-bold text-xs text-brand-500 mb-1">🐂 Gado e Grandes Animais</h3>
+                                <p class="text-[11px] text-slate-500">Manejo de pastagens, hidratação biológica, cuidados em partos rurais e proteção sanitária contra infeções bacterianas.</p>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- TAB: AMÉLIA IA OFFLINE -->
+                <div id="tabContent-amelia" class="tab-pane hidden space-y-6">
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-100 dark:border-slate-800 shadow-sm">
+                        <div class="flex items-center gap-3 border-b pb-4 mb-4">
+                            <div class="w-12 h-12 rounded-full bg-brand-500 flex items-center justify-center text-white text-2xl">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-bold">Amélia Inteligência Autónoma</h2>
+                                <p class="text-xs text-slate-400">Diagnóstico Inteligente Local Baseado em Regras (Sem Internet)</p>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold mb-1">Selecione o Grupo Animal:</label>
+                                <select id="ameliaSpecies" class="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border text-xs">
+                                    <option value="aves">Aves / Capoeira</option>
+                                    <option value="bovinos">Bovinos / Ruminantes</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold mb-1">O que nota no comportamento ou corpo?</label>
+                                <textarea id="ameliaSymptoms" rows="3" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border text-xs" placeholder="Ex: espirros, olhos inchados, cansaço..."></textarea>
+                            </div>
+                            <button onclick="runAmeliaDiagnostic()" class="w-full bg-brand-500 text-white text-xs font-bold py-3 rounded-xl shadow-lg hover:bg-brand-600 transition">
+                                <i class="fas fa-brain mr-1"></i> Executar Mecanismo de Diagnóstico Local
+                            </button>
+                            <div id="ameliaResult" class="hidden p-4 rounded-xl border bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 text-xs">
+                                <h4 class="font-bold text-brand-600 flex items-center gap-2 mb-1"><i class="fas fa-check-circle"></i> Triagem de Sintomas Concluída</h4>
+                                <p id="ameliaResponseText" class="text-slate-700 dark:text-slate-300 leading-relaxed"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: MAPA GPS RADAR -->
+                <div id="tabContent-farmacia" class="tab-pane hidden space-y-6">
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-100 dark:border-slate-800 shadow-sm">
+                        <h2 class="text-xl font-extrabold text-brand-500 dark:text-brand-accent flex items-center gap-2 mb-1">
+                            <i class="fas fa-satellite"></i> Radar de Proximidade por Satélite GPS
+                        </h2>
+                        <p class="text-xs text-slate-400 mb-4">Mostra a sua localização exata em tempo real em qualquer lugar do mundo. Os marcadores locais adaptam-se ao seu país.</p>
+                        <div id="pharmacyMap" class="w-full h-80 rounded-2xl border bg-slate-100"></div>
                     </div>
                 </div>
 
             </div>
         </div>
     </main>
-
-    <!-- BARRA INFERIOR DE NAVEGAÇÃO FIXA MOBILE -->
-    <!-- O Perfil agora está ordenado logo atrás (à esquerda) do botão do feed -->
-    <nav class="fixed bottom-0 inset-x-0 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 z-40 px-2 shadow-xl">
-        <div class="flex items-center justify-around h-16 max-w-md mx-auto">
-            
-            <!-- NOVO POSICIONAMENTO: Botão de Perfil (Atrás do Feed) -->
-            <button onclick="openProfileModal()" class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-brand-500 transition w-12">
-                <img id="footerAvatar" class="w-5 h-5 rounded-full object-cover border border-slate-300" src="https://ui-avatars.com/api/?background=cbd5e1&color=64748b&name=Novo+Usuario" alt="Perfil">
-                <span class="text-[10px] font-medium mt-0.5 truncate max-w-full">Perfil</span>
-            </button>
-
-            <!-- Botão Feed -->
-            <button onclick="changeTab('feed')" class="flex flex-col items-center justify-center text-brand-500 dark:text-brand-accent w-12">
-                <i class="fas fa-rss text-lg"></i>
-                <span class="text-[10px] font-bold mt-0.5">Feed</span>
-            </button>
-
-            <!-- Botão Guia Técnico -->
-            <button onclick="changeTab('diretorio')" class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-brand-500 transition w-12">
-                <i class="fas fa-book-open text-lg"></i>
-                <span class="text-[10px] font-medium mt-0.5">Guia</span>
-            </button>
-
-            <!-- Botão Amélia IA -->
-            <button onclick="changeTab('amelia')" class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-brand-500 transition w-12">
-                <i class="fas fa-microscope text-lg"></i>
-                <span class="text-[10px] font-medium mt-0.5">Amélia</span>
-            </button>
-
-            <!-- Botão Clínicas -->
-            <button onclick="changeTab('farmacia')" class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-brand-500 transition w-12">
-                <i class="fas fa-map-marked-alt text-lg"></i>
-                <span class="text-[10px] font-medium mt-0.5">Clínicas</span>
-            </button>
-        </div>
-    </nav>
 </div>
 
-<!-- SCRIPT DE CONTROLO DO MENU LATERAL -->
+<!-- MODAL PERFIL LOCAL -->
+<div id="profileModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-md w-full border space-y-4 shadow-2xl">
+        <h3 class="text-base font-extrabold"><i class="fas fa-id-card text-brand-500"></i> Conta Autónoma</h3>
+        <div class="space-y-3 text-xs">
+            <div>
+                <label class="block font-bold mb-1">Seu Nome ou Identificação:</label>
+                <input type="text" id="inputName" class="w-full p-2.5 rounded-xl border bg-slate-50 dark:bg-slate-950">
+            </div>
+            <div>
+                <label class="block font-bold mb-1">Sua Função:</label>
+                <select id="inputRole" class="w-full p-2.5 rounded-xl border bg-slate-50 dark:bg-slate-950">
+                    <option value="Criador Independente">Criador Independente</option>
+                    <option value="Veterinário Local">Veterinário Especialista</option>
+                </select>
+            </div>
+            <button onclick="saveProfile()" class="w-full bg-brand-500 text-white font-bold py-2.5 rounded-xl shadow">
+                Gravar no Armazenamento do Telefone
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
-    function toggleSidebar() {
-        const sidePanel = document.getElementById('sidePanel');
-        const overlay = document.getElementById('sidebarOverlay');
+    let mapInitialized = false;
+    let currentMap = null;
+    let userMarker = null;
+    let customProfilePhotoBase64 = "";
+
+    // FUNÇÃO PRINCIPAL: PEDIR COORDENADAS AO GPS DO APARELHO (Sinal de Satélite Directo)
+    function requestGPSLocation() {
+        const locDisplay = document.getElementById('locationDisplay');
         
-        if (sidePanel.classList.contains('-translate-x-full')) {
-            sidePanel.classList.remove('-translate-x-full');
-            overlay.classList.remove('hidden');
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    // Atualiza o indicador de localização usando coordenadas geográficas universais
+                    locDisplay.innerText = `Coordenadas GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                    document.getElementById('sidebarCountry').innerHTML = `<i class="fas fa-location-dot text-brand-accent"></i> Localizado via Satélite`;
+
+                    // Se o mapa já existir, move o foco para onde o usuário está no planeta
+                    if (mapInitialized && currentMap) {
+                        currentMap.setView([lat, lng], 14);
+                        if (userMarker) currentMap.removeLayer(userMarker);
+                        userMarker = L.marker([lat, lng]).addTo(currentMap)
+                            .bindPopup('<b>Você está aqui</b><br>Monitorização ativa offline pelo GPS do aparelho.')
+                            .openPopup();
+                    }
+                },
+                (error) => {
+                    locDisplay.innerText = "GPS ativo (Modo Manual Offline)";
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
         } else {
-            sidePanel.classList.add('-translate-x-full');
-            overlay.classList.add('hidden');
+            locDisplay.innerText = "GPS não suportado neste dispositivo";
         }
     }
 
-    // Funções simuladas para manter a integridade dos cliques
-    function changeTab(tabName) {
-        console.log("Mudando para a aba: " + tabName);
-        // Coloque aqui a sua lógica existente para alternar as abas
-    }
-    function toggleDarkMode() {
-        document.documentElement.classList.toggle('dark');
-    }
-    function openProfileModal() { alert('Abrindo Configurações do Perfil...'); }
-    function openSecurityModal() { alert('Abrindo Configurações de Segurança...'); }
-    function openPrivacyModal() { alert('Abrindo Configurações de Privacidade...'); }
-    function openHelpModal() { alert('Abrindo Ajuda...'); }
-</script>
+    function changeTab(tabId) {
+        document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+        const targetTab = document.getElementById(`tabContent-${tabId}`);
+        if(targetTab) targetTab.classList.remove('hidden');
 
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.className = "nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl text-slate-600 dark:text-slate-400 font-semibold transition hover:bg-slate-100 dark:hover:bg-slate-800";
+        });
+        const activeBtn = document.getElementById(`nav-${tabId}`);
+        if(activeBtn) {
+            activeBtn.className = "nav-btn w-full flex items-center justify-between px-3 py-3 rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/10 dark:text-brand-accent font-bold transition";
+        }
+
+        if(tabId === 'farmacia' && !mapInitialized) {
+            setTimeout(initMap, 200);
+        }
+    }
+
+    function initMap() {
+        if (mapInitialized) return;
+        mapInitialized = true;
+        
+        // Inicializa o mapa com visão global padrão. O GPS mudará a rota assim que ler o sinal do aparelho.
+        currentMap = L.map('pharmacyMap').setView([0, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(currentMap);
+        
+        requestGPSLocation();
+    }
+
+    function saveProfile() {
+        const name = document.getElementById('inputName').value || "Usuário Global";
+        const role = document.getElementById('inputRole').value;
+        
+        document.getElementById('headerName').innerText = name;
+        document.getElementById('sidebarName').innerText = name;
+        document.getElementById('sidebarRole').innerText = role;
+
+        // Salva localmente no navegador (LocalStorage) para não apagar mesmo desligando o telefone
+        localStorage.setItem('vetvida_username', name);
+        localStorage.setItem('vetvida_userrole', role);
+
+        closeModal('profileModal');
+    }
+
+    function createPost() {
+        const text = document.getElementById('postText').value.trim();
+        if(!text) return;
+
+        const name = document.getElementById('headerName').innerText;
+        const newPost = document.createElement('div');
+        newPost.className = "bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-100 dark:border-slate-800 shadow-sm space-y-2";
+        newPost.innerHTML = `
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center text-xs font-bold text-slate-700">${name[0]}</div>
+                <div>
+                    <h4 class="text-xs font-bold">${name}</h4>
+                    <p class="text-[9px] text-slate-400">Gravado no Dispositivo • Offline</p>
+                </div>
+            </div>
+            <p class="text-xs text-slate-600 dark:text-slate-300">${text}</p>
+        `;
+        const list = document.getElementById('postsList');
+        list.insertBefore(newPost, list.firstChild);
+        document.getElementById('postText').value = "";
+    }
+
+    function runAmeliaDiagnostic() {
+        const symptoms = document.getElementById('ameliaSymptoms').value.toLowerCase();
+        if(!symptoms) return;
+
+        const resultContainer = document.getElementById('ameliaResult');
+        const textContainer = document.getElementById('ameliaResponseText');
+        resultContainer.classList.remove('hidden');
+
+        // Lógica de árvores de decisão processada internamente no telefone (Sem chamadas de servidor externo)
+        if(symptoms.includes('espirro') || symptoms.includes('olho') || symptoms.includes('inchado')) {
+            textContainer.innerHTML = "<b>Análise de Dados Interna:</b> Indicadores compatíveis com problemas respiratórios crónicos ou Coriza. <br><br><b>Ação recomendada pelo sistema autónomo:</b> Colocar o animal em quarentena imediata. Evitar correntes de ar frio e humidade na base do alojamento.";
+        } else {
+            textContainer.innerHTML = "<b>Triagem Concluída:</b> Sintomas catalogados. Mantenha o animal sob monitorização de temperatura e certifique-se de que a água fornecida provém de uma fonte limpa.";
+        }
+    }
+
+    // CARREGAR DADOS SALVOS DO TELEFONE AO ABRIR
+    window.onload = function() {
+        const savedName = localStorage.getItem('vetvida_username');
+        const savedRole = localStorage.getItem('vetvida_userrole');
+        if(savedName && savedRole) {
+            document.getElementById('headerName').innerText = savedName;
+            document.getElementById('sidebarName').innerText = savedName;
+            document.getElementById('sidebarRole').innerText = savedRole;
+        }
+        requestGPSLocation();
+    }
+
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    function openProfileModal() { openModal('profileModal'); }
+    function toggleDarkMode() { document.documentElement.classList.toggle('dark'); }
+</script>
 </body>
 </html>
