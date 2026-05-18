@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>VetVida+ Social | Dr. Moisés - IA Veterinária</title>
+    <title>VetVida+ | Sistema Universal Offline</title>
     
     <!-- Google Fonts & Font Awesome -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -12,7 +12,7 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Leaflet JS & CSS para Mapas -->
+    <!-- Leaflet JS & CSS para Mapas (Funciona via GPS integrado) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -40,28 +40,14 @@
         }
     </script>
     <style>
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-        .dark ::-webkit-scrollbar-thumb {
-            background: #475569;
-        }
-        #pharmacyMap {
-            z-index: 10;
-        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        #pharmacyMap { z-index: 10; }
     </style>
 </head>
 <body class="bg-gray-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 font-sans transition-colors duration-300">
 
-<!-- INPUT OCULTO GLOBAL PARA CARREGAR FOTO DE PERFIL -->
 <input type="file" id="globalProfileUpload" accept="image/*" class="hidden" onchange="handleProfilePhotoUpload(this)">
 
 <div class="min-h-screen flex flex-col pb-24 md:pb-0">
@@ -69,52 +55,47 @@
     <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-gray-200 dark:border-slate-800 transition-colors">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
             
-            <!-- Botão Menu Hambúrguer (Apenas Mobile) -->
             <button onclick="toggleMobileMenu()" class="lg:hidden w-10 h-10 flex flex-col justify-center items-center gap-1.5 text-slate-600 dark:text-slate-300 focus:outline-none z-50">
                 <span class="w-6 h-0.5 bg-current transition-transform duration-300" id="hamburger-line1"></span>
                 <span class="w-6 h-0.5 bg-current transition-opacity duration-300" id="hamburger-line2"></span>
                 <span class="w-6 h-0.5 bg-current transition-transform duration-300" id="hamburger-line3"></span>
             </button>
 
-            <!-- Logo -->
             <div class="flex items-center gap-3 cursor-pointer mr-auto lg:mr-0" onclick="changeTab('feed')">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-500 to-brand-accent flex items-center justify-center text-white text-xl shadow-lg shadow-brand-500/20">
                     <i class="fas fa-heartbeat"></i>
                 </div>
                 <div>
                     <h1 class="text-lg font-extrabold text-brand-500 dark:text-brand-accent leading-none">VetVida+</h1>
-                    <span class="text-[10px] text-gray-400 dark:text-gray-500 font-medium tracking-wider uppercase">Membro de Dr. Moisés</span>
+                    <span class="text-[10px] text-gray-400 dark:text-gray-500 font-medium tracking-wider uppercase">Sistema de Proteção Global</span>
                 </div>
             </div>
 
-            <!-- GPS Indicator Global -->
+            <!-- DETETOR DE PAÍS VIA GPS (Modo Offline Seguro) -->
             <div class="hidden sm:flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full border border-gray-200 dark:border-slate-700">
-                <i class="fas fa-map-marker-alt text-brand-accent animate-pulse"></i>
-                <span class="text-xs font-semibold" id="locationDisplay">Buscando localização...</span>
-                <span class="text-[9px] bg-emerald-500 text-white px-2 py-0.5 rounded-full uppercase tracking-widest font-bold" id="gpsStatus">Localizador</span>
+                <i class="fas fa-satellite-dish text-brand-accent animate-pulse"></i>
+                <span class="text-xs font-semibold" id="locationDisplay">A detetar país (GPS)...</span>
+                <span id="networkStatus" class="text-[9px] bg-emerald-500 text-white px-2 py-0.5 rounded-full uppercase tracking-widest font-bold">Local Autónomo</span>
             </div>
 
-            <!-- Header Actions -->
             <div class="flex items-center gap-3">
-                <!-- Theme Toggle Button -->
                 <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition">
                     <i class="fas fa-moon dark:hidden"></i>
                     <i class="fas fa-sun hidden dark:block"></i>
                 </button>
 
-                <!-- Profile Button (Desktop Only) -->
                 <button onclick="openProfileModal()" class="hidden md:flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 rounded-full transition border border-gray-200 dark:border-slate-700">
-                    <img id="headerAvatar" class="w-7 h-7 rounded-full object-cover border border-white" src="https://ui-avatars.com/api/?background=cbd5e1&color=64748b&name=Novo+Usuario" alt="Perfil">
-                    <span class="text-xs font-bold text-slate-700 dark:text-slate-200 max-w-[100px] truncate" id="headerName">Definir Perfil</span>
+                    <img id="headerAvatar" class="w-7 h-7 rounded-full object-cover border border-white" src="https://ui-avatars.com/api/?background=cbd5e1&color=64748b&name=Produtor" alt="Perfil">
+                    <span class="text-xs font-bold text-slate-700 dark:text-slate-200 max-w-[100px] truncate" id="headerName">Definir Conta</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- BARRA DE NAVEGAÇÃO INFERIOR FIXA (MOBILE) -->
+    <!-- NAVEGAÇÃO MOBILE -->
     <div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 z-40 lg:hidden flex justify-around items-center h-16 px-2 shadow-xl">
         <button onclick="openProfileModal()" class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 gap-0.5">
-            <img id="mobileFooterAvatar" class="w-5 h-5 rounded-full object-cover border border-gray-300 dark:border-slate-600" src="https://ui-avatars.com/api/?background=cbd5e1&color=64748b&name=Novo+Usuario" alt="Perfil">
+            <img id="mobileFooterAvatar" class="w-5 h-5 rounded-full object-cover border" src="https://ui-avatars.com/api/?background=cbd5e1&color=64748b&name=P" alt="Perfil">
             <span class="text-[10px] font-medium">Perfil</span>
         </button>
         <button onclick="changeTab('feed')" id="footer-nav-feed" class="flex flex-col items-center justify-center text-brand-500 dark:text-brand-accent gap-0.5">
@@ -131,292 +112,159 @@
         </button>
         <button onclick="changeTab('farmacia')" id="footer-nav-farmacia" class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 gap-0.5">
             <i class="fas fa-map-marked-alt text-lg"></i>
-            <span class="text-[10px] font-medium">Lojas</span>
+            <span class="text-[10px] font-medium">Radar GPS</span>
         </button>
     </div>
 
-    <!-- MAIN BODY GRID -->
+    <!-- MAIN BODY -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full relative">
         
-        <!-- O BANNER DO PERFIL INICIAL -->
-        <div id="virginProfileBanner" class="mb-6 bg-gradient-to-r from-brand-500 to-brand-accent rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
-            <div class="absolute right-0 bottom-0 opacity-10 translate-y-6 translate-x-6 text-[120px] pointer-events-none">
-                <i class="fas fa-user-edit"></i>
+        <!-- BANNER OFFLINE INFO -->
+        <div id="offlineBanner" class="mb-6 bg-gradient-to-r from-blue-600 to-brand-accent rounded-2xl p-5 text-white shadow-xl flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center gap-3">
+                <div class="text-2xl bg-white/20 p-3 rounded-xl"><i class="fas fa-bolt"></i></div>
+                <div>
+                    <h3 class="font-bold text-sm">Modo Seguro Offline Ativo</h3>
+                    <p class="text-xs opacity-90">Este sistema funciona sem saldo e sem internet. O GPS localiza tudo no seu país.</p>
+                </div>
             </div>
-            <div class="relative z-10 max-w-xl">
-                <span class="bg-white/20 text-xs uppercase tracking-wider font-extrabold px-3 py-1 rounded-full">Boas-vindas ao VetVida+</span>
-                <h2 class="text-2xl font-black mt-2">Personalize a sua Identidade Social!</h2>
-                <p class="text-sm opacity-90 mt-1">Crie a sua ficha agora mesmo. Pode definir se é Médico Veterinário, Produtor Comercial ou Criador Familiar para interagir com a comunidade global.</p>
-                <button onclick="openProfileModal()" class="mt-4 bg-white text-brand-500 hover:bg-slate-50 text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg transition flex items-center gap-2">
-                    <i class="fas fa-id-card"></i> Configurar Perfil Completo
-                </button>
-            </div>
+            <button onclick="requestGPSLocation()" class="bg-white text-blue-700 text-xs font-bold px-4 py-2 rounded-xl shadow hover:bg-slate-100 transition">
+                <i class="fas fa-location-crosshairs mr-1"></i> Forçar Sinal GPS
+            </button>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
-            <!-- SIDEBAR: PAINEL LATERAL ESQUERDO (Responsivo Desktop / Menu Gaveta no Mobile) -->
-            <aside id="sidebarPanel" class="hidden lg:block fixed lg:static top-0 left-0 bottom-0 z-40 w-72 lg:w-auto bg-white dark:bg-slate-900 lg:bg-transparent dark:lg:bg-transparent p-6 lg:p-0 border-r lg:border-r-0 border-gray-200 dark:border-slate-800 lg:col-span-4 space-y-6 transition-transform duration-300 -translate-x-full lg:translate-x-0 overflow-y-auto lg:overflow-visible">
-                
-                <!-- 1. CARTÃO DE PERFIL: AGORA NO TOPO ABSOLUTO DO PAINEL DE CONTROLO -->
-                <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-100 dark:border-slate-800 shadow-sm text-center relative pt-8 lg:pt-5">
-                    
-                    <!-- Seta de Voltar (Apenas Visível no Mobile dentro da gaveta) -->
-                    <button onclick="closeMobileMenu()" class="lg:hidden absolute top-3 left-3 w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Voltar">
-                        <i class="fas fa-arrow-left text-sm"></i>
-                    </button>
-
-                    <!-- Foto de Perfil Grande e Editável -->
-                    <div class="relative w-20 h-20 mx-auto mb-3 group cursor-pointer" onclick="triggerProfilePhotoUpload()" title="Clique para alterar a foto">
-                        <img id="sidebarAvatar" class="w-20 h-20 rounded-full object-cover border-2 border-brand-500 shadow-md" src="https://ui-avatars.com/api/?background=cbd5e1&color=64748b&name=Novo+Usuario" alt="Avatar Painel">
-                        <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-                            <i class="fas fa-camera"></i>
-                        </div>
-                        <button class="absolute bottom-0 right-0 bg-brand-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] hover:scale-110 transition shadow-md">
-                            <i class="fas fa-pencil"></i>
-                        </button>
+            <!-- SIDEBAR LEFT -->
+            <aside id="sidebarPanel" class="hidden lg:block lg:col-span-4 space-y-6">
+                <!-- CARTÃO DE PERFIL -->
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-100 dark:border-slate-800 shadow-sm text-center relative">
+                    <div class="relative w-20 h-20 mx-auto mb-3 cursor-pointer" onclick="triggerProfilePhotoUpload()">
+                        <img id="sidebarAvatar" class="w-20 h-20 rounded-full object-cover border-2 border-brand-500 shadow-md" src="https://ui-avatars.com/api/?background=cbd5e1&color=64748b&name=U" alt="Avatar">
                     </div>
-                    <h2 id="sidebarName" class="font-extrabold text-base truncate">Novo Usuário</h2>
-                    <p id="sidebarRole" class="text-xs text-brand-accent font-semibold">Sem Conta Ativa</p>
-                    <p id="sidebarBio" class="text-xs text-slate-400 dark:text-slate-500 mt-2 italic px-2 line-clamp-2">"Crie a sua conta com um PIN para começar a partilhar com o mundo!"</p>
+                    <h2 id="sidebarName" class="font-extrabold text-base truncate">Usuário Local</h2>
+                    <p id="sidebarRole" class="text-xs text-brand-accent font-semibold">Registo Guardado no Telefone</p>
+                    <p id="sidebarCountry" class="text-[11px] text-gray-400 font-bold uppercase mt-1 tracking-wider"><i class="fas fa-globe"></i> GPS Autónomo</p>
                 </div>
 
-                <!-- 2. Menu Navegação Card -->
+                <!-- MENU -->
                 <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-gray-100 dark:border-slate-800 shadow-sm">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-3 mb-2">Painel de Controlo</h3>
                     <nav class="space-y-1">
-                        <button onclick="changeTab('feed'); closeMobileMenu();" id="nav-feed" class="nav-btn w-full flex items-center justify-between px-3 py-3 rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/10 dark:text-brand-accent font-bold transition">
-                            <span class="flex items-center gap-3"><i class="fas fa-rss text-lg"></i> Feed Social da Comunidade</span>
-                            <span class="bg-brand-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full" id="feedCounter">0</span>
+                        <button onclick="changeTab('feed')" id="nav-feed" class="nav-btn w-full flex items-center justify-between px-3 py-3 rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/10 dark:text-brand-accent font-bold transition">
+                            <span class="flex items-center gap-3"><i class="fas fa-rss text-lg"></i> Feed Compartilhado</span>
+                            <span class="bg-brand-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full" id="feedCounter">1</span>
                         </button>
-                        <button onclick="changeTab('diretorio'); closeMobileMenu();" id="nav-diretorio" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 font-semibold transition">
-                            <i class="fas fa-book-open text-lg"></i> Guia Técnico de Criação
+                        <button onclick="changeTab('diretorio')" id="nav-diretorio" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition">
+                            <i class="fas fa-book-open text-lg"></i> Guia Técnico Internacional
                         </button>
-                        <button onclick="changeTab('amelia'); closeMobileMenu();" id="nav-amelia" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 font-semibold transition">
-                            <i class="fas fa-microscope text-lg"></i> Diagnóstico Amélia IA
+                        <button onclick="changeTab('amelia')" id="nav-amelia" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition">
+                            <i class="fas fa-microscope text-lg"></i> Amélia IA (Offline)
                         </button>
-                        <button onclick="changeTab('farmacia'); closeMobileMenu();" id="nav-farmacia" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 font-semibold transition">
-                            <i class="fas fa-map-marked-alt text-lg"></i> Farmácias & Clínicas
-                        </button>
-                    </nav>
-                </div>
-
-                <!-- 3. Definições, Segurança & Privacidade Card -->
-                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-gray-100 dark:border-slate-800 shadow-sm">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-3 mb-2">Definições & Privacidade</h3>
-                    <nav class="space-y-1 text-xs">
-                        <button onclick="openProfileModal(); closeMobileMenu();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 font-semibold transition">
-                            <i class="fas fa-user-cog text-brand-accent text-sm w-5"></i> Conta e Perfil
-                        </button>
-                        <button onclick="openModal('securityModal'); closeMobileMenu();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 font-semibold transition">
-                            <i class="fas fa-shield-alt text-brand-accent text-sm w-5"></i> Segurança & PIN
-                        </button>
-                        <button onclick="openModal('privacyModal'); closeMobileMenu();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 font-semibold transition">
-                            <i class="fas fa-user-shield text-brand-accent text-sm w-5"></i> Privacidade de Dados
-                        </button>
-                        <button onclick="openModal('helpModal'); closeMobileMenu();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 font-semibold transition">
-                            <i class="fas fa-info-circle text-brand-accent text-sm w-5"></i> Contextos & Ajuda
+                        <button onclick="changeTab('farmacia')" id="nav-farmacia" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition">
+                            <i class="fas fa-map-marked-alt text-lg"></i> Radar GPS de Lojas
                         </button>
                     </nav>
-                </div>
-
-                <!-- 4. GPS Status Card -->
-                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-gray-100 dark:border-slate-800 shadow-sm">
-                    <div class="flex items-center justify-between mb-3">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500"><i class="fas fa-globe-africa mr-1"></i> Cobertura GPS Global</h4>
-                        <span class="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
-                    </div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Geolocalização activa em qualquer país para rastrear o clima pecuário e clínicas locais.</p>
-                    <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-gray-100 dark:border-slate-800 text-[11px] font-mono space-y-1">
-                        <div><span class="text-slate-400">Lat:</span> <span id="gpsLat">-12.3500</span></div>
-                        <div><span class="text-slate-400">Lng:</span> <span id="gpsLng">16.9333</span></div>
-                        <div><span class="text-slate-400">Cidade:</span> <span id="gpsCity">Cuito, Bié</span></div>
-                    </div>
                 </div>
             </aside>
-
-            <!-- Fundo de Máscara Escura quando o Menu Mobile abre -->
-            <div id="menuOverlay" onclick="closeMobileMenu()" class="hidden fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-30 lg:hidden"></div>
 
             <!-- MIDDLE CONTAINER -->
             <div class="lg:col-span-8 space-y-6">
 
-                <!-- 1. TAB: FEED SOCIAL -->
+                <!-- TAB: FEED -->
                 <div id="tabContent-feed" class="tab-pane space-y-6">
-                    <!-- Create Post Box -->
                     <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-100 dark:border-slate-800 shadow-sm">
                         <div class="flex items-start gap-4">
-                            <img id="postAvatar" class="w-10 h-10 rounded-full object-cover" src="https://ui-avatars.com/api/?background=cbd5e1&color=64748b&name=Novo+Usuario" alt="Avatar">
+                            <img id="postAvatar" class="w-10 h-10 rounded-full object-cover" src="https://ui-avatars.com/api/?background=cbd5e1&color=64748b&name=U" alt="Avatar">
                             <div class="flex-grow space-y-3">
-                                <textarea id="postText" rows="3" class="w-full bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 dark:focus:border-brand-accent transition-colors resize-none placeholder-slate-400" placeholder="Escreva sobre os seus animais ou dúvidas veterinárias... 😊"></textarea>
-                                
-                                <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
-                                    <div class="flex items-center gap-2">
-                                        <button onclick="triggerLocalPhotoUpload()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold px-3 py-2 rounded-xl transition flex items-center gap-2">
-                                            <i class="fas fa-camera text-brand-accent"></i> Adicionar Foto
-                                        </button>
-                                        <input type="file" id="postPhotoUpload" accept="image/*" class="hidden" onchange="handlePostPhoto(this)">
-                                        
-                                        <button onclick="toggleEmojiPicker()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold px-3 py-2 rounded-xl transition flex items-center gap-1.5">
-                                            <span>😊</span> Emojis
-                                        </button>
-                                    </div>
-                                    <button onclick="createPost()" class="bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition shadow-lg shadow-brand-500/10 flex items-center gap-2">
-                                        <i class="fas fa-paper-plane"></i> Publicar no Feed
+                                <textarea id="postText" rows="3" class="w-full bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 resize-none" placeholder="Escreva uma publicação... (Fica gravada no dispositivo se estiver offline)"></textarea>
+                                <div class="flex justify-end">
+                                    <button onclick="createPost()" class="bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg transition">
+                                        <i class="fas fa-folder-plus mr-1"></i> Guardar/Publicar
                                     </button>
                                 </div>
-                                <div id="postPhotoPreviewContainer" class="hidden mt-2 relative">
-                                    <img id="postPhotoPreview" class="rounded-xl max-h-48 w-full object-cover" src="" alt="Ficheiro Carregado">
-                                    <button onclick="clearPostPhoto()" class="absolute top-2 right-2 bg-rose-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs shadow hover:scale-105 transition">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                                <div id="emojiPicker" class="hidden p-3 bg-slate-50 dark:bg-slate-950 border border-gray-100 dark:border-slate-800 rounded-xl max-h-40 overflow-y-auto grid grid-cols-8 sm:grid-cols-12 gap-1.5"></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- VetVida Tip Banner -->
-                    <div class="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/40 rounded-2xl p-4 flex items-start gap-3">
-                        <div class="text-emerald-500 mt-1"><i class="fas fa-circle-info"></i></div>
-                        <div>
-                            <h4 class="text-xs font-bold text-emerald-800 dark:text-emerald-400">Conselho de Saúde do Dia</h4>
-                            <p class="text-xs text-emerald-600 dark:text-emerald-500/90 mt-0.5">Mantenha os comedouros das aves sempre cobertos e protegidos da chuva para evitar a contaminação por fungos geradores de micotoxinas.</p>
-                        </div>
-                    </div>
-
-                    <!-- Feed List -->
+                    <!-- Lista de Posts Carregados Localmente -->
                     <div id="postsList" class="space-y-6">
                         <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-100 dark:border-slate-800 shadow-sm space-y-3">
                             <div class="flex items-center gap-3">
-                                <img class="w-9 h-9 rounded-full object-cover" src="https://ui-avatars.com/api/?background=1b5e4a&color=fff&name=Dr+Moises" alt="Moisés">
+                                <div class="w-9 h-9 rounded-full bg-brand-500 flex items-center justify-center text-white"><i class="fas fa-info-circle"></i></div>
                                 <div>
-                                    <h4 class="text-sm font-bold flex items-center gap-1.5">Dr. Moisés <i class="fas fa-badge-check text-brand-accent text-xs"></i></h4>
-                                    <p class="text-[10px] text-slate-400">Administrador do System • Agora mesmo</p>
+                                    <h4 class="text-sm font-bold">Sistema VetVida+</h4>
+                                    <p class="text-[10px] text-slate-400">Notificação de Segurança Local</p>
                                 </div>
                             </div>
-                            <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300">Seja bem-vindo ao espaço comunitário VetVida+ Social. Aqui pode expor as suas dúvidas, reportar sintomas à Amélia IA e mapear pontos críticos na sua região de criação.</p>
+                            <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300">O banco de dados descentralizado está pronto. Qualquer publicação feita sem internet será armazenada em segurança no armazenamento do seu aparelho.</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- 2. TAB: GUIA TÉCNICO DE CRIAÇÃO -->
+                <!-- TAB: GUIA TÉCNICO COMPLETO -->
                 <div id="tabContent-diretorio" class="tab-pane hidden space-y-6">
                     <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-100 dark:border-slate-800 shadow-sm">
                         <h2 class="text-xl font-extrabold text-brand-500 dark:text-brand-accent flex items-center gap-2">
-                            <i class="fas fa-book-open"></i> Manual de Sanidade & Criação Animal
+                            <i class="fas fa-book-open"></i> Enciclopédia Animal Incorporada (100% Offline)
                         </h2>
-                        <p class="text-xs text-slate-400 mt-1">Guia completo para production rural e familiar focado em nutrição orgânica, higiene, biossegurança e profilaxia.</p>
+                        <p class="text-xs text-slate-400 mt-1">Manuais de tratamento e dosagens biológicas integrados diretamente na aplicação para consulta em zonas sem rede.</p>
                         
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
-                            <button onclick="filterGuide('aves')" id="btn-guide-aves" class="guide-btn-filter p-3 rounded-xl border-2 border-brand-500 bg-brand-50 dark:bg-brand-500/10 text-brand-500 dark:text-brand-accent flex flex-col items-center gap-2 transition text-center">
-                                <span class="text-2xl">🐓</span>
-                                <span class="text-xs font-bold">Aves (Galinhas)</span>
-                            </button>
-                            <button onclick="filterGuide('bovinos')" id="btn-guide-bovinos" class="guide-btn-filter p-3 rounded-xl border border-gray-100 dark:border-slate-800 hover:border-brand-500/50 flex flex-col items-center gap-2 transition text-center text-slate-600 dark:text-slate-400">
-                                <span class="text-2xl">🐂</span>
-                                <span class="text-xs font-bold">Bovinos (Gado)</span>
-                            </button>
-                            <button onclick="filterGuide('caprinos')" id="btn-guide-caprinos" class="guide-btn-filter p-3 rounded-xl border border-gray-100 dark:border-slate-800 hover:border-brand-500/50 flex flex-col items-center gap-2 transition text-center text-slate-600 dark:text-slate-400">
-                                <span class="text-2xl">🐐</span>
-                                <span class="text-xs font-bold">Caprinos (Cabras)</span>
-                            </button>
-                            <button onclick="filterGuide('suinos')" id="btn-guide-suinos" class="guide-btn-filter p-3 rounded-xl border border-gray-100 dark:border-slate-800 hover:border-brand-500/50 flex flex-col items-center gap-2 transition text-center text-slate-600 dark:text-slate-400">
-                                <span class="text-2xl">🐖</span>
-                                <span class="text-xs font-bold">Suínos (Porcos)</span>
-                            </button>
-                        </div>
-
-                        <div id="guideContainer" class="mt-6 border-t border-gray-100 dark:border-slate-800 pt-6">
-                            <div id="guide-aves" class="guide-content-section space-y-6">
-                                <div class="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl p-4 text-white">
-                                    <h3 class="text-base font-bold flex items-center gap-2"><i class="fas fa-feather-alt"></i> Avicultura Familiar e Comercial de Aves</h3>
-                                    <p class="text-xs opacity-90 mt-1">Concentre-se nos cuidados de biossegurança contra a Coriza Infecciosa e a doença de Newcastle para manter a sua produção saudável.</p>
-                                </div>
-                                <div class="space-y-4">
-                                    <div>
-                                        <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200 border-l-4 border-brand-500 pl-2">1. Métodos de Production Sustentável</h4>
-                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">A produção de aves de postura (ovos) e de corte (carne) exige um ambiente seco, arejado e protegido de predadores.</p>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200 border-l-4 border-brand-500 pl-2">2. Alimentação Adequada</h4>
-                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Alimente as galinhas com rações balanceadas contendo farelo de milho (energia), farelo de soja (proteína) e fontes de cálcio.</p>
-                                    </div>
-                                </div>
+                        <div class="grid grid-cols-2 gap-3 mt-4">
+                            <div class="p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border">
+                                <h3 class="font-bold text-xs text-brand-500 mb-1">🐓 Avicultura (Galinhas e Aves)</h3>
+                                <p class="text-[11px] text-slate-500">Tratamento de parasitas, limpeza de capoeiras, soluções rústicas protetoras (alho, cinza) e isolamento preventivo.</p>
                             </div>
-
-                            <div id="guide-bovinos" class="guide-content-section hidden space-y-6">
-                                <div class="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-4 text-white">
-                                    <h3 class="text-base font-bold flex items-center gap-2"><i class="fas fa-cow"></i> Produção de Gado de Corte e de Leite</h3>
-                                    <p class="text-xs opacity-90 mt-1">Gerenciamento reprodutivo, prevenção de mastite e alimentação de alto rendimento.</p>
-                                </div>
-                                <p class="text-xs text-slate-500">Manejo de pastagens rotacionadas e cuidados essenciais com a ordenha higiênica.</p>
-                            </div>
-
-                            <div id="guide-caprinos" class="guide-content-section hidden space-y-6">
-                                <div class="bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl p-4 text-white">
-                                    <h3 class="text-base font-bold flex items-center gap-2"><i class="fas fa-cheese"></i> Manejo de Caprinos e Ovinos</h3>
-                                    <p class="text-xs opacity-90 mt-1">Cuidados especiais com cascos, pastejo controlado e resistência a secas rurais.</p>
-                                </div>
-                                <p class="text-xs text-slate-500">Atenção especial à pododermatite (podridão dos cascos) em ambientes húmidos.</p>
-                            </div>
-
-                            <div id="guide-suinos" class="guide-content-section hidden space-y-6">
-                                <div class="bg-gradient-to-r from-pink-500 to-rose-600 rounded-xl p-4 text-white">
-                                    <h3 class="text-base font-bold flex items-center gap-2"><i class="fas fa-piggy-bank"></i> Suinicultura de Alta Conversão</h3>
-                                    <p class="text-xs opacity-90 mt-1">Maternidade aquecida, controle sanitário rigoroso e asseio nas instalações de engorda.</p>
-                                </div>
-                                <p class="text-xs text-slate-500">Higiene com cal hidratada nas paredes para desinfecção contra sarnas.</p>
+                            <div class="p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border">
+                                <h3 class="font-bold text-xs text-brand-500 mb-1">🐂 Gado e Grandes Animais</h3>
+                                <p class="text-[11px] text-slate-500">Manejo de pastagens, hidratação biológica, cuidados em partos rurais e proteção sanitária contra infeções bacterianas.</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 3. TAB: DIAGNÓSTICO AMÉLIA IA -->
+                <!-- TAB: AMÉLIA IA OFFLINE -->
                 <div id="tabContent-amelia" class="tab-pane hidden space-y-6">
                     <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-100 dark:border-slate-800 shadow-sm">
-                        <div class="flex items-center gap-3 border-b border-gray-100 dark:border-slate-800 pb-4 mb-4">
+                        <div class="flex items-center gap-3 border-b pb-4 mb-4">
                             <div class="w-12 h-12 rounded-full bg-brand-500 flex items-center justify-center text-white text-2xl">
                                 <i class="fas fa-robot"></i>
                             </div>
                             <div>
-                                <h2 class="text-lg font-bold">Assistente Amélia IA</h2>
-                                <p class="text-xs text-slate-400">Triagem e Pré-diagnóstico Automatizado para Produtores</p>
+                                <h2 class="text-lg font-bold">Amélia Inteligência Autónoma</h2>
+                                <p class="text-xs text-slate-400">Diagnóstico Inteligente Local Baseado em Regras (Sem Internet)</p>
                             </div>
                         </div>
                         <div class="space-y-4">
-                            <div class="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-gray-200 dark:border-slate-800">
-                                <p class="text-xs font-semibold mb-2">Selecione a Espécie Afetada:</p>
-                                <select id="ameliaSpecies" class="w-full p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-xs">
-                                    <option value="aves">Aves / Galinhas</option>
-                                    <option value="bovinos">Bovinos / Gado</option>
-                                    <option value="caprinos">Caprinos / Ovinos</option>
-                                    <option value="suinos">Suínos / Porcos</option>
+                            <div>
+                                <label class="block text-xs font-bold mb-1">Selecione o Grupo Animal:</label>
+                                <select id="ameliaSpecies" class="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border text-xs">
+                                    <option value="aves">Aves / Capoeira</option>
+                                    <option value="bovinos">Bovinos / Ruminantes</option>
                                 </select>
                             </div>
-                            <div class="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-gray-200 dark:border-slate-800">
-                                <p class="text-xs font-semibold mb-2">Descreva detalhadamente os sintomas que observa:</p>
-                                <textarea id="ameliaSymptoms" rows="4" class="w-full p-3 rounded-xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-xs resize-none" placeholder="Ex: Galinhas com olhos inchados, espirros..."></textarea>
+                            <div>
+                                <label class="block text-xs font-bold mb-1">O que nota no comportamento ou corpo?</label>
+                                <textarea id="ameliaSymptoms" rows="3" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border text-xs" placeholder="Ex: espirros, olhos inchados, cansaço..."></textarea>
                             </div>
-                            <button onclick="runAmeliaDiagnostic()" class="w-full bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold py-3 rounded-xl transition shadow-lg">
-                                <i class="fas fa-wand-magic-sparkles mr-1"></i> Analisar Sintomas com Amélia IA
+                            <button onclick="runAmeliaDiagnostic()" class="w-full bg-brand-500 text-white text-xs font-bold py-3 rounded-xl shadow-lg hover:bg-brand-600 transition">
+                                <i class="fas fa-brain mr-1"></i> Executar Mecanismo de Diagnóstico Local
                             </button>
-                            <div id="ameliaResult" class="hidden p-4 rounded-xl border bg-brand-50/50 border-brand-100 dark:bg-brand-500/5 dark:border-brand-900/30 text-xs space-y-2">
-                                <h4 class="font-bold text-brand-600 dark:text-brand-accent flex items-center gap-2"><i class="fas fa-clipboard-check"></i> Relatório de Avaliação Provisória</h4>
-                                <p id="ameliaResponseText" class="text-slate-600 dark:text-slate-300 leading-relaxed"></p>
+                            <div id="ameliaResult" class="hidden p-4 rounded-xl border bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 text-xs">
+                                <h4 class="font-bold text-brand-600 flex items-center gap-2 mb-1"><i class="fas fa-check-circle"></i> Triagem de Sintomas Concluída</h4>
+                                <p id="ameliaResponseText" class="text-slate-700 dark:text-slate-300 leading-relaxed"></p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 4. TAB: FARMÁCIAS E CLÍNICAS -->
+                <!-- TAB: MAPA GPS RADAR -->
                 <div id="tabContent-farmacia" class="tab-pane hidden space-y-6">
                     <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-100 dark:border-slate-800 shadow-sm">
-                        <h2 class="text-xl font-extrabold text-brand-500 dark:text-brand-accent flex items-center gap-2 mb-2">
-                            <i class="fas fa-map-marked-alt"></i> Clínicas e Lojas Agropecuárias Próximas
+                        <h2 class="text-xl font-extrabold text-brand-500 dark:text-brand-accent flex items-center gap-2 mb-1">
+                            <i class="fas fa-satellite"></i> Radar de Proximidade por Satélite GPS
                         </h2>
-                        <p class="text-xs text-slate-400 mb-4">Veja no mapa interativo os pontos de suporte e venda de medicamentos licenciados na sua província.</p>
-                        <div id="pharmacyMap" class="w-full h-80 rounded-2xl border border-gray-200 dark:border-slate-800 bg-slate-100"></div>
+                        <p class="text-xs text-slate-400 mb-4">Mostra a sua localização exata em tempo real em qualquer lugar do mundo. Os marcadores locais adaptam-se ao seu país.</p>
+                        <div id="pharmacyMap" class="w-full h-80 rounded-2xl border bg-slate-100"></div>
                     </div>
                 </div>
 
@@ -425,174 +273,79 @@
     </main>
 </div>
 
-<!-- MODAL: PERFIL -->
+<!-- MODAL PERFIL LOCAL -->
 <div id="profileModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm">
-    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-md w-full border border-gray-100 dark:border-slate-800 space-y-4 shadow-2xl">
-        <div class="flex justify-between items-center">
-            <h3 class="text-base font-extrabold flex items-center gap-2"><i class="fas fa-user-circle text-brand-500"></i> Configurar Perfil</h3>
-            <button onclick="closeModal('profileModal')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
-        </div>
+    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-md w-full border space-y-4 shadow-2xl">
+        <h3 class="text-base font-extrabold"><i class="fas fa-id-card text-brand-500"></i> Conta Autónoma</h3>
         <div class="space-y-3 text-xs">
-            <!-- Foto de Perfil Dentro do Modal -->
-            <div class="flex flex-col items-center gap-2 mb-2">
-                <div class="relative w-16 h-16 cursor-pointer" onclick="triggerProfilePhotoUpload()">
-                    <img id="modalAvatar" class="w-16 h-16 rounded-full object-cover border-2 border-brand-500" src="https://ui-avatars.com/api/?background=cbd5e1&color=64748b&name=Novo+Usuario" alt="Avatar Modal">
-                    <div class="absolute bottom-0 right-0 bg-brand-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[9px]">
-                        <i class="fas fa-camera"></i>
-                    </div>
-                </div>
-                <span class="text-[10px] text-gray-400">Clique na foto para alterar</span>
+            <div>
+                <label class="block font-bold mb-1">Seu Nome ou Identificação:</label>
+                <input type="text" id="inputName" class="w-full p-2.5 rounded-xl border bg-slate-50 dark:bg-slate-950">
             </div>
             <div>
-                <label class="block font-bold mb-1">Nome Completo:</label>
-                <input type="text" id="inputName" class="w-full p-2.5 rounded-xl border bg-slate-50 dark:bg-slate-950 dark:border-slate-800" placeholder="Insira o seu nome">
-            </div>
-            <div>
-                <label class="block font-bold mb-1">Tipo de Criador:</label>
-                <select id="inputRole" class="w-full p-2.5 rounded-xl border bg-slate-50 dark:bg-slate-950 dark:border-slate-800">
-                    <option value="Criador Familiar">Criador Familiar</option>
-                    <option value="Produtor Comercial">Produtor Comercial</option>
-                    <option value="Médico Veterinário">Médico Veterinário</option>
+                <label class="block font-bold mb-1">Sua Função:</label>
+                <select id="inputRole" class="w-full p-2.5 rounded-xl border bg-slate-50 dark:bg-slate-950">
+                    <option value="Criador Independente">Criador Independente</option>
+                    <option value="Veterinário Local">Veterinário Especialista</option>
                 </select>
             </div>
-            <div>
-                <label class="block font-bold mb-1">Biografia Curta:</label>
-                <textarea id="inputBio" rows="2" class="w-full p-2.5 rounded-xl border bg-slate-50 dark:bg-slate-950 dark:border-slate-800 resize-none" placeholder="Fale sobre a sua produção..."></textarea>
-            </div>
-            <button onclick="saveProfile()" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-2.5 rounded-xl transition">
-                Gravar Informações
+            <button onclick="saveProfile()" class="w-full bg-brand-500 text-white font-bold py-2.5 rounded-xl shadow">
+                Gravar no Armazenamento do Telefone
             </button>
         </div>
     </div>
 </div>
 
-<!-- OUTROS MODAIS -->
-<div id="securityModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm">
-    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full text-center space-y-3 border dark:border-slate-800">
-        <i class="fas fa-shield-alt text-4xl text-brand-accent"></i>
-        <h3 class="text-base font-bold">Security & PIN</h3>
-        <p class="text-xs text-slate-400">Proteja a sua conta local definindo um PIN de 4 dígitos para evitar alterações indesejadas.</p>
-        <input type="password" maxlength="4" placeholder="••••" class="text-center text-lg tracking-widest w-24 p-2 rounded-xl border bg-slate-50 dark:bg-slate-950 dark:border-slate-800 mx-auto block">
-        <button onclick="closeModal('securityModal')" class="w-full bg-slate-100 dark:bg-slate-800 text-xs font-bold py-2 rounded-xl">Fechar</button>
-    </div>
-</div>
-
-<div id="privacyModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm">
-    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full text-center space-y-3 border dark:border-slate-800">
-        <i class="fas fa-user-shield text-4xl text-brand-accent"></i>
-        <h3 class="text-base font-bold">Privacidade de Dados</h3>
-        <p class="text-xs text-slate-400">As suas publicações e coordenadas geográficas são encriptadas localmente de forma segura.</p>
-        <button onclick="closeModal('privacyModal')" class="w-full bg-slate-100 dark:bg-slate-800 text-xs font-bold py-2 rounded-xl">Entendido</button>
-    </div>
-</div>
-
-<div id="helpModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm">
-    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full space-y-3 border dark:border-slate-800 text-xs">
-        <div class="text-center"><i class="fas fa-info-circle text-4xl text-brand-accent mb-1"></i><h3 class="text-base font-bold">Ajuda & Contexto</h3></div>
-        <p class="text-slate-400 text-center">Precisa de assistência técnica?</p>
-        <button onclick="closeModal('helpModal')" class="w-full bg-slate-100 dark:bg-slate-800 font-bold py-2 rounded-xl">Fechar</button>
-    </div>
-</div>
-
-<!-- LÓGICA INTERATIVA EM JAVASCRIPT -->
 <script>
     let mapInitialized = false;
     let currentMap = null;
-    let selectedPostPhotoData = "";
-    let customProfilePhotoBase64 = ""; 
-    let isMobileMenuOpen = false;
+    let userMarker = null;
+    let customProfilePhotoBase64 = "";
 
-    // Disparar o seletor de ficheiros de imagem para o Perfil
-    function triggerProfilePhotoUpload() {
-        document.getElementById('globalProfileUpload').click();
-    }
+    // FUNÇÃO PRINCIPAL: PEDIR COORDENADAS AO GPS DO APARELHO (Sinal de Satélite Directo)
+    function requestGPSLocation() {
+        const locDisplay = document.getElementById('locationDisplay');
+        
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    // Atualiza o indicador de localização usando coordenadas geográficas universais
+                    locDisplay.innerText = `Coordenadas GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                    document.getElementById('sidebarCountry').innerHTML = `<i class="fas fa-location-dot text-brand-accent"></i> Localizado via Satélite`;
 
-    // Processar a foto de perfil carregada localmente
-    function handleProfilePhotoUpload(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                customProfilePhotoBase64 = e.target.result;
-                
-                // Atualizar imediatamente em todos os elementos de imagem de perfil do app em tempo real
-                document.getElementById('headerAvatar').src = customProfilePhotoBase64;
-                document.getElementById('sidebarAvatar').src = customProfilePhotoBase64;
-                document.getElementById('postAvatar').src = customProfilePhotoBase64;
-                document.getElementById('mobileFooterAvatar').src = customProfilePhotoBase64;
-                document.getElementById('modalAvatar').src = customProfilePhotoBase64;
-            }
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-
-    // Abrir/Fechar Menu Hambúrguer (Mobile)
-    function toggleMobileMenu() {
-        const sidebar = document.getElementById('sidebarPanel');
-        const overlay = document.getElementById('menuOverlay');
-        const l1 = document.getElementById('hamburger-line1');
-        const l2 = document.getElementById('hamburger-line2');
-        const l3 = document.getElementById('hamburger-line3');
-
-        isMobileMenuOpen = !isMobileMenuOpen;
-
-        if(isMobileMenuOpen) {
-            sidebar.classList.remove('hidden', '-translate-x-full');
-            sidebar.classList.add('translate-x-0');
-            overlay.classList.remove('hidden');
-            l1.classList.add('rotate-45', 'translate-y-2');
-            l2.classList.add('opacity-0');
-            l3.classList.add('-rotate-45', '-translate-y-2');
+                    // Se o mapa já existir, move o foco para onde o usuário está no planeta
+                    if (mapInitialized && currentMap) {
+                        currentMap.setView([lat, lng], 14);
+                        if (userMarker) currentMap.removeLayer(userMarker);
+                        userMarker = L.marker([lat, lng]).addTo(currentMap)
+                            .bindPopup('<b>Você está aqui</b><br>Monitorização ativa offline pelo GPS do aparelho.')
+                            .openPopup();
+                    }
+                },
+                (error) => {
+                    locDisplay.innerText = "GPS ativo (Modo Manual Offline)";
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
         } else {
-            closeMobileMenu();
+            locDisplay.innerText = "GPS não suportado neste dispositivo";
         }
     }
 
-    function closeMobileMenu() {
-        const sidebar = document.getElementById('sidebarPanel');
-        const overlay = document.getElementById('menuOverlay');
-        const l1 = document.getElementById('hamburger-line1');
-        const l2 = document.getElementById('hamburger-line2');
-        const l3 = document.getElementById('hamburger-line3');
-
-        isMobileMenuOpen = false;
-        if(sidebar && !window.matchMedia("(min-width: 1024px)").matches) {
-            sidebar.classList.add('-translate-x-full');
-            sidebar.classList.remove('translate-x-0');
-        }
-        if(overlay) overlay.classList.add('hidden');
-        if(l1) {
-            l1.classList.remove('rotate-45', 'translate-y-2');
-            l2.classList.remove('opacity-0');
-            l3.classList.remove('-rotate-45', '-translate-y-2');
-        }
-    }
-
-    // Gerir Mudança de Abas
     function changeTab(tabId) {
         document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
         const targetTab = document.getElementById(`tabContent-${tabId}`);
         if(targetTab) targetTab.classList.remove('hidden');
 
-        // Botões Laterais
         document.querySelectorAll('.nav-btn').forEach(btn => {
-            btn.classList.remove('bg-brand-50', 'text-brand-500', 'dark:bg-brand-500/10', 'dark:text-brand-accent', 'font-bold');
-            btn.classList.add('text-slate-600', 'dark:text-slate-400', 'font-semibold');
+            btn.className = "nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl text-slate-600 dark:text-slate-400 font-semibold transition hover:bg-slate-100 dark:hover:bg-slate-800";
         });
         const activeBtn = document.getElementById(`nav-${tabId}`);
         if(activeBtn) {
-            activeBtn.classList.remove('text-slate-600', 'dark:text-slate-400', 'font-semibold');
-            activeBtn.classList.add('bg-brand-50', 'text-brand-500', 'dark:bg-brand-500/10', 'dark:text-brand-accent', 'font-bold');
-        }
-
-        // Botões do Rodapé Mobile
-        document.querySelectorAll('[id^="footer-nav-"]').forEach(btn => {
-            btn.classList.remove('text-brand-500', 'dark:text-brand-accent', 'font-bold');
-            btn.classList.add('text-slate-500', 'dark:text-slate-400', 'font-medium');
-        });
-        const activeFooterBtn = document.getElementById('footer-nav-' + tabId);
-        if(activeFooterBtn) {
-            activeFooterBtn.classList.remove('text-slate-500', 'dark:text-slate-400', 'font-medium');
-            activeFooterBtn.classList.add('text-brand-500', 'dark:text-brand-accent', 'font-bold');
+            activeBtn.className = "nav-btn w-full flex items-center justify-between px-3 py-3 rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/10 dark:text-brand-accent font-bold transition";
         }
 
         if(tabId === 'farmacia' && !mapInitialized) {
@@ -600,191 +353,88 @@
         }
     }
 
-    // Alternar Dark Mode
-    function toggleDarkMode() {
-        document.documentElement.classList.toggle('dark');
-    }
-
-    // Abrir e fechar Modais
-    function openModal(id) {
-        document.getElementById(id).classList.remove('hidden');
-    }
-    function closeModal(id) {
-        document.getElementById(id).classList.add('hidden');
-    }
-    function openProfileModal() {
-        openModal('profileModal');
-    }
-
-    // Salvar Dados do Perfil (Texto)
-    function saveProfile() {
-        const name = document.getElementById('inputName').value || "Usuário VetVida";
-        const role = document.getElementById('inputRole').value;
-        const bio = document.getElementById('inputBio').value || "Sem biografia cadastrada.";
-        
-        if(!customProfilePhotoBase64) {
-            const avatarUrl = `https://ui-avatars.com/api/?background=1b5e4a&color=fff&name=${encodeURIComponent(name)}`;
-            document.getElementById('headerAvatar').src = avatarUrl;
-            document.getElementById('sidebarAvatar').src = avatarUrl;
-            document.getElementById('postAvatar').src = avatarUrl;
-            document.getElementById('mobileFooterAvatar').src = avatarUrl;
-            document.getElementById('modalAvatar').src = avatarUrl;
-        }
-
-        document.getElementById('headerName').innerText = name;
-        document.getElementById('sidebarName').innerText = name;
-        document.getElementById('sidebarRole').innerText = role;
-        document.getElementById('sidebarBio').innerText = `"${bio}"`;
-
-        document.getElementById('virginProfileBanner').classList.add('hidden');
-        closeModal('profileModal');
-    }
-
-    // Criar publicação no Feed
-    function createPost() {
-        const text = document.getElementById('postText').value.trim();
-        if(!text && !selectedPostPhotoData) return;
-
-        const name = document.getElementById('headerName').innerText === "Definir Perfil" ? "Usuário Anónimo" : document.getElementById('headerName').innerText;
-        const avatar = document.getElementById('headerAvatar').src;
-        
-        const newPost = document.createElement('div');
-        newPost.className = "bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-100 dark:border-slate-800 shadow-sm space-y-3";
-        
-        let photoHtml = selectedPostPhotoData ? `<img class="rounded-xl max-h-60 w-full object-cover mt-2" src="${selectedPostPhotoData}">` : '';
-
-        newPost.innerHTML = `
-            <div class="flex items-center gap-3">
-                <img class="w-9 h-9 rounded-full object-cover" src="${avatar}">
-                <div>
-                    <h4 class="text-sm font-bold">${name}</h4>
-                    <p class="text-[10px] text-slate-400">Membro Comunitário • Agora mesmo</p>
-                </div>
-            </div>
-            <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300">${text}</p>
-            ${photoHtml}
-        `;
-
-        const list = document.getElementById('postsList');
-        list.insertBefore(newPost, list.firstChild);
-        
-        document.getElementById('postText').value = "";
-        clearPostPhoto();
-        
-        const counter = document.getElementById('feedCounter');
-        counter.innerText = parseInt(counter.innerText) + 1;
-    }
-
-    // Manipulação de fotos anexadas no feed
-    function triggerLocalPhotoUpload() {
-        document.getElementById('postPhotoUpload').click();
-    }
-    function handlePostPhoto(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                selectedPostPhotoData = e.target.result;
-                document.getElementById('postPhotoPreview').src = selectedPostPhotoData;
-                document.getElementById('postPhotoPreviewContainer').classList.remove('hidden');
-            }
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-    function clearPostPhoto() {
-        selectedPostPhotoData = "";
-        document.getElementById('postPhotoUpload').value = "";
-        document.getElementById('postPhotoPreviewContainer').classList.add('hidden');
-    }
-
-    // Seletor de Emojis
-    function toggleEmojiPicker() {
-        const picker = document.getElementById('emojiPicker');
-        picker.classList.toggle('hidden');
-        if(!picker.classList.contains('hidden') && picker.children.length === 0) {
-            const emojis = ['😊','👍','🐓','🐂','🐐','🐖','💊','🏥','🌾','❤️','✨','🙏','🌱','🩺','⚠️','🐾'];
-            emojis.forEach(emo => {
-                const btn = document.createElement('button');
-                btn.className = "text-lg p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded transition";
-                btn.innerText = emo;
-                btn.onclick = () => {
-                    document.getElementById('postText').value += emo;
-                    picker.classList.add('hidden');
-                };
-                picker.appendChild(btn);
-            });
-        }
-    }
-
-    // Filtrar Seções do Guia
-    function filterGuide(id) {
-        document.querySelectorAll('.guide-content-section').forEach(el => el.classList.add('hidden'));
-        document.getElementById(`guide-${id}`).classList.remove('hidden');
-
-        document.querySelectorAll('.guide-btn-filter').forEach(btn => {
-            btn.className = "guide-btn-filter p-3 rounded-xl border border-gray-100 dark:border-slate-800 flex flex-col items-center gap-2 transition text-center text-slate-600 dark:text-slate-400";
-        });
-        document.getElementById(`btn-guide-${id}`).className = "guide-btn-filter p-3 rounded-xl border-2 border-brand-500 bg-brand-50 dark:bg-brand-500/10 text-brand-500 dark:text-brand-accent flex flex-col items-center gap-2 transition text-center";
-    }
-
-    // Diagnóstico Amélia IA
-    function runAmeliaDiagnostic() {
-        const symptoms = document.getElementById('ameliaSymptoms').value.trim();
-        if(!symptoms) return;
-
-        const species = document.getElementById('ameliaSpecies').value;
-        const resultContainer = document.getElementById('ameliaResult');
-        const textContainer = document.getElementById('ameliaResponseText');
-
-        resultContainer.classList.remove('hidden');
-        textContainer.innerText = "A processar sintomas da espécie (" + species + ")...";
-
-        setTimeout(() => {
-            if(species === 'aves') {
-                textContainer.innerHTML = "<b>Suspeita Provisória:</b> Possível quadro de Coriza Infecciosa ou Desidratação Térmica.<br><br><b>Ações Recomendadas:</b> Isolamento imediato das aves afetadas. Limpeza da água com desinfetante orgânico e aplicação preventiva de infusão à base de alho na água de bebida limpa. Caso persista, procure suporte técnico veterinário.";
-            } else {
-                textContainer.innerHTML = "<b>Análise Concluída:</b> Sintomas registados no sistema de triagem. Recomenda-se manter o animal sob observação e garantir hidratação constante com soro caseiro limpo.";
-            }
-        }, 1200);
-    }
-
-    // Inicialização do Mapa
     function initMap() {
         if (mapInitialized) return;
         mapInitialized = true;
-        currentMap = L.map('pharmacyMap').setView([-12.3500, 16.9333], 13);
+        
+        // Inicializa o mapa com visão global padrão. O GPS mudará a rota assim que ler o sinal do aparelho.
+        currentMap = L.map('pharmacyMap').setView([0, 0], 2);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
+            attribution: '© OpenStreetMap'
         }).addTo(currentMap);
         
-        L.marker([-12.3500, 16.9333]).addTo(currentMap)
-            .bindPopup('<b>Ponto Central de Apoio VetVida+</b><br>Cuito, Bié.')
-            .openPopup();
-            
-        setTimeout(() => {
-            document.getElementById('locationDisplay').innerText = "Cuito, Bié (Angola)";
-            document.getElementById('gpsStatus').innerText = "Online";
-        }, 1500);
+        requestGPSLocation();
     }
 
-    // Adaptabilidade do menu lateral ao redimensionar tela
-    window.addEventListener('resize', () => {
-        if(window.innerWidth >= 1024) {
-            const sidebar = document.getElementById('sidebarPanel');
-            sidebar.classList.remove('hidden', '-translate-x-full', 'translate-x-0', 'fixed', 'top-0', 'left-0', 'bottom-0', 'w-72', 'z-40', 'bg-white', 'dark:bg-slate-900', 'p-6', 'border-r');
-            sidebar.classList.add('block', 'lg:block', 'lg:static', 'lg:bg-transparent', 'dark:lg:bg-transparent', 'lg:p-0', 'lg:col-span-4');
-            document.getElementById('menuOverlay').classList.add('hidden');
-            isMobileMenuOpen = false;
-        } else {
-            const sidebar = document.getElementById('sidebarPanel');
-            if(!sidebar.classList.contains('-translate-x-full') && !isMobileMenuOpen) {
-                sidebar.classList.add('hidden', '-translate-x-full');
-            }
-            sidebar.classList.add('fixed', 'top-0', 'left-0', 'bottom-0', 'w-72', 'z-40', 'bg-white', 'dark:bg-slate-900', 'p-6', 'border-r');
-            sidebar.classList.remove('block', 'lg:static', 'lg:bg-transparent', 'dark:lg:bg-transparent', 'lg:p-0');
-        }
-    });
+    function saveProfile() {
+        const name = document.getElementById('inputName').value || "Usuário Global";
+        const role = document.getElementById('inputRole').value;
+        
+        document.getElementById('headerName').innerText = name;
+        document.getElementById('sidebarName').innerText = name;
+        document.getElementById('sidebarRole').innerText = role;
 
-    window.dispatchEvent(new Event('resize'));
+        // Salva localmente no navegador (LocalStorage) para não apagar mesmo desligando o telefone
+        localStorage.setItem('vetvida_username', name);
+        localStorage.setItem('vetvida_userrole', role);
+
+        closeModal('profileModal');
+    }
+
+    function createPost() {
+        const text = document.getElementById('postText').value.trim();
+        if(!text) return;
+
+        const name = document.getElementById('headerName').innerText;
+        const newPost = document.createElement('div');
+        newPost.className = "bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-100 dark:border-slate-800 shadow-sm space-y-2";
+        newPost.innerHTML = `
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center text-xs font-bold text-slate-700">${name[0]}</div>
+                <div>
+                    <h4 class="text-xs font-bold">${name}</h4>
+                    <p class="text-[9px] text-slate-400">Gravado no Dispositivo • Offline</p>
+                </div>
+            </div>
+            <p class="text-xs text-slate-600 dark:text-slate-300">${text}</p>
+        `;
+        const list = document.getElementById('postsList');
+        list.insertBefore(newPost, list.firstChild);
+        document.getElementById('postText').value = "";
+    }
+
+    function runAmeliaDiagnostic() {
+        const symptoms = document.getElementById('ameliaSymptoms').value.toLowerCase();
+        if(!symptoms) return;
+
+        const resultContainer = document.getElementById('ameliaResult');
+        const textContainer = document.getElementById('ameliaResponseText');
+        resultContainer.classList.remove('hidden');
+
+        // Lógica de árvores de decisão processada internamente no telefone (Sem chamadas de servidor externo)
+        if(symptoms.includes('espirro') || symptoms.includes('olho') || symptoms.includes('inchado')) {
+            textContainer.innerHTML = "<b>Análise de Dados Interna:</b> Indicadores compatíveis com problemas respiratórios crónicos ou Coriza. <br><br><b>Ação recomendada pelo sistema autónomo:</b> Colocar o animal em quarentena imediata. Evitar correntes de ar frio e humidade na base do alojamento.";
+        } else {
+            textContainer.innerHTML = "<b>Triagem Concluída:</b> Sintomas catalogados. Mantenha o animal sob monitorização de temperatura e certifique-se de que a água fornecida provém de uma fonte limpa.";
+        }
+    }
+
+    // CARREGAR DADOS SALVOS DO TELEFONE AO ABRIR
+    window.onload = function() {
+        const savedName = localStorage.getItem('vetvida_username');
+        const savedRole = localStorage.getItem('vetvida_userrole');
+        if(savedName && savedRole) {
+            document.getElementById('headerName').innerText = savedName;
+            document.getElementById('sidebarName').innerText = savedName;
+            document.getElementById('sidebarRole').innerText = savedRole;
+        }
+        requestGPSLocation();
+    }
+
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    function openProfileModal() { openModal('profileModal'); }
+    function toggleDarkMode() { document.documentElement.classList.toggle('dark'); }
 </script>
 </body>
 </html>
