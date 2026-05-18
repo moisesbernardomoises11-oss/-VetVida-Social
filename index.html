@@ -158,20 +158,30 @@
             <!-- SIDEBAR: PAINEL LATERAL ESQUERDO (Responsivo Desktop / Menu Gaveta no Mobile) -->
             <aside id="sidebarPanel" class="hidden lg:block fixed lg:static top-0 left-0 bottom-0 z-40 w-72 lg:w-auto bg-white dark:bg-slate-900 lg:bg-transparent dark:lg:bg-transparent p-6 lg:p-0 border-r lg:border-r-0 border-gray-200 dark:border-slate-800 lg:col-span-4 space-y-6 transition-transform duration-300 -translate-x-full lg:translate-x-0 overflow-y-auto lg:overflow-visible">
                 
-                <!-- TOPO DO PAINEL: Foto Editável e Seta de Voltar (Apenas Mobile/Gaveta) -->
-                <div class="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-4 mb-2 lg:hidden">
-                    <div class="relative w-12 h-12 group cursor-pointer" onclick="triggerProfilePhotoUpload()">
-                        <img id="panelHeaderAvatar" class="w-12 h-12 rounded-full object-cover border-2 border-brand-500" src="https://ui-avatars.com/api/?background=cbd5e1&color=64748b&name=Novo+Usuario" alt="Avatar Painel">
-                        <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center text-white text-[10px] opacity-100 transition-opacity">
-                            <i class="fas fa-pen text-[9px]"></i>
-                        </div>
-                    </div>
-                    <button onclick="closeMobileMenu()" class="w-10 h-10 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Voltar">
-                        <i class="fas fa-arrow-left text-base"></i>
+                <!-- 1. CARTÃO DE PERFIL: AGORA NO TOPO ABSOLUTO DO PAINEL DE CONTROLO -->
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-100 dark:border-slate-800 shadow-sm text-center relative pt-8 lg:pt-5">
+                    
+                    <!-- Seta de Voltar (Apenas Visível no Mobile dentro da gaveta) -->
+                    <button onclick="closeMobileMenu()" class="lg:hidden absolute top-3 left-3 w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Voltar">
+                        <i class="fas fa-arrow-left text-sm"></i>
                     </button>
+
+                    <!-- Foto de Perfil Grande e Editável -->
+                    <div class="relative w-20 h-20 mx-auto mb-3 group cursor-pointer" onclick="triggerProfilePhotoUpload()" title="Clique para alterar a foto">
+                        <img id="sidebarAvatar" class="w-20 h-20 rounded-full object-cover border-2 border-brand-500 shadow-md" src="https://ui-avatars.com/api/?background=cbd5e1&color=64748b&name=Novo+Usuario" alt="Avatar Painel">
+                        <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                        <button class="absolute bottom-0 right-0 bg-brand-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] hover:scale-110 transition shadow-md">
+                            <i class="fas fa-pencil"></i>
+                        </button>
+                    </div>
+                    <h2 id="sidebarName" class="font-extrabold text-base truncate">Novo Usuário</h2>
+                    <p id="sidebarRole" class="text-xs text-brand-accent font-semibold">Sem Conta Ativa</p>
+                    <p id="sidebarBio" class="text-xs text-slate-400 dark:text-slate-500 mt-2 italic px-2 line-clamp-2">"Crie a sua conta com um PIN para começar a partilhar com o mundo!"</p>
                 </div>
 
-                <!-- Main Nav Card (Controlo do Painel) -->
+                <!-- 2. Menu Navegação Card -->
                 <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-gray-100 dark:border-slate-800 shadow-sm">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-3 mb-2">Painel de Controlo</h3>
                     <nav class="space-y-1">
@@ -191,7 +201,7 @@
                     </nav>
                 </div>
 
-                <!-- Definições, Segurança & Privacidade Card -->
+                <!-- 3. Definições, Segurança & Privacidade Card -->
                 <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-gray-100 dark:border-slate-800 shadow-sm">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-3 mb-2">Definições & Privacidade</h3>
                     <nav class="space-y-1 text-xs">
@@ -210,20 +220,7 @@
                     </nav>
                 </div>
 
-                <!-- Mini Profile Display (Desktop) -->
-                <div class="hidden lg:block bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-100 dark:border-slate-800 shadow-sm text-center">
-                    <div class="relative w-20 h-20 mx-auto mb-3">
-                        <img id="sidebarAvatar" class="w-20 h-20 rounded-full object-cover border-2 border-brand-500" src="https://ui-avatars.com/api/?background=cbd5e1&color=64748b&name=Novo+Usuario" alt="Avatar">
-                        <button onclick="triggerProfilePhotoUpload()" class="absolute bottom-0 right-0 bg-brand-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] hover:scale-105 transition shadow-md">
-                            <i class="fas fa-pencil"></i>
-                        </button>
-                    </div>
-                    <h2 id="sidebarName" class="font-extrabold text-base">Novo Usuário</h2>
-                    <p id="sidebarRole" class="text-xs text-brand-accent font-semibold">Sem Conta Ativa</p>
-                    <p id="sidebarBio" class="text-xs text-slate-400 dark:text-slate-500 mt-2 italic px-2">"Crie a sua conta com um PIN para começar a partilhar com o mundo!"</p>
-                </div>
-
-                <!-- GPS Status Card -->
+                <!-- 4. GPS Status Card -->
                 <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-gray-100 dark:border-slate-800 shadow-sm">
                     <div class="flex items-center justify-between mb-3">
                         <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500"><i class="fas fa-globe-africa mr-1"></i> Cobertura GPS Global</h4>
@@ -241,7 +238,7 @@
             <!-- Fundo de Máscara Escura quando o Menu Mobile abre -->
             <div id="menuOverlay" onclick="closeMobileMenu()" class="hidden fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-30 lg:hidden"></div>
 
-            <!-- MIDDLE CONTAINER (8 Cols) -->
+            <!-- MIDDLE CONTAINER -->
             <div class="lg:col-span-8 space-y-6">
 
                 <!-- 1. TAB: FEED SOCIAL -->
@@ -473,7 +470,7 @@
 <div id="securityModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm">
     <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full text-center space-y-3 border dark:border-slate-800">
         <i class="fas fa-shield-alt text-4xl text-brand-accent"></i>
-        <h3 class="text-base font-bold">Segurança & PIN</h3>
+        <h3 class="text-base font-bold">Security & PIN</h3>
         <p class="text-xs text-slate-400">Proteja a sua conta local definindo um PIN de 4 dígitos para evitar alterações indesejadas.</p>
         <input type="password" maxlength="4" placeholder="••••" class="text-center text-lg tracking-widest w-24 p-2 rounded-xl border bg-slate-50 dark:bg-slate-950 dark:border-slate-800 mx-auto block">
         <button onclick="closeModal('securityModal')" class="w-full bg-slate-100 dark:bg-slate-800 text-xs font-bold py-2 rounded-xl">Fechar</button>
@@ -502,7 +499,7 @@
     let mapInitialized = false;
     let currentMap = null;
     let selectedPostPhotoData = "";
-    let customProfilePhotoBase64 = ""; // Guarda a foto carregada pelo utilizador
+    let customProfilePhotoBase64 = ""; 
     let isMobileMenuOpen = false;
 
     // Disparar o seletor de ficheiros de imagem para o Perfil
@@ -517,12 +514,11 @@
             reader.onload = function(e) {
                 customProfilePhotoBase64 = e.target.result;
                 
-                // Atualizar imediatamente em todos os elementos de imagem de perfil do app
+                // Atualizar imediatamente em todos os elementos de imagem de perfil do app em tempo real
                 document.getElementById('headerAvatar').src = customProfilePhotoBase64;
                 document.getElementById('sidebarAvatar').src = customProfilePhotoBase64;
                 document.getElementById('postAvatar').src = customProfilePhotoBase64;
                 document.getElementById('mobileFooterAvatar').src = customProfilePhotoBase64;
-                document.getElementById('panelHeaderAvatar').src = customProfilePhotoBase64;
                 document.getElementById('modalAvatar').src = customProfilePhotoBase64;
             }
             reader.readAsDataURL(input.files[0]);
@@ -593,7 +589,7 @@
             btn.classList.remove('text-brand-500', 'dark:text-brand-accent', 'font-bold');
             btn.classList.add('text-slate-500', 'dark:text-slate-400', 'font-medium');
         });
-        const activeFooterBtn = document.getElementById(`footer-nav-${tabId}`);
+        const activeFooterBtn = document.getElementById('footer-nav-' + tabId);
         if(activeFooterBtn) {
             activeFooterBtn.classList.remove('text-slate-500', 'dark:text-slate-400', 'font-medium');
             activeFooterBtn.classList.add('text-brand-500', 'dark:text-brand-accent', 'font-bold');
@@ -626,14 +622,12 @@
         const role = document.getElementById('inputRole').value;
         const bio = document.getElementById('inputBio').value || "Sem biografia cadastrada.";
         
-        // Caso o utilizador não tenha carregado foto personalizada, gera uma com as iniciais do nome
         if(!customProfilePhotoBase64) {
             const avatarUrl = `https://ui-avatars.com/api/?background=1b5e4a&color=fff&name=${encodeURIComponent(name)}`;
             document.getElementById('headerAvatar').src = avatarUrl;
             document.getElementById('sidebarAvatar').src = avatarUrl;
             document.getElementById('postAvatar').src = avatarUrl;
             document.getElementById('mobileFooterAvatar').src = avatarUrl;
-            document.getElementById('panelHeaderAvatar').src = avatarUrl;
             document.getElementById('modalAvatar').src = avatarUrl;
         }
 
@@ -772,7 +766,7 @@
         }, 1500);
     }
 
-    // Fechar menu ao redimensionar tela para desktop
+    // Adaptabilidade do menu lateral ao redimensionar tela
     window.addEventListener('resize', () => {
         if(window.innerWidth >= 1024) {
             const sidebar = document.getElementById('sidebarPanel');
